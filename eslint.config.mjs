@@ -14,14 +14,15 @@ export default defineConfig([
 			globals: {
 				...globals.browser,
 				...globals.node,
+				...globals.jest,
 			},
 		},
 		rules: {
-			quotes: 2,
-			eqeqeq: 2,
-			semi: 2,
-			radix: 2,
-			camelcase: [
+			'quotes': 2,
+			'eqeqeq': 2,
+			'semi': 2,
+			'radix': 2,
+			'camelcase': [
 				2,
 				{
 					properties: 'always',
