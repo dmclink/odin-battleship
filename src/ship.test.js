@@ -7,6 +7,11 @@ describe('ship', () => {
 	let s5 = new Ship(5);
 	beforeEach(() => (s5 = new Ship(5)));
 
+	it('has the right length', () => {
+		expect(s2.length).toBe(2);
+		expect(s5.length).toBe(5);
+	});
+
 	it('hits', () => {
 		expect(s2.hits).toBe(0);
 		s2.hit();
@@ -20,17 +25,30 @@ describe('ship', () => {
 	});
 
 	it('throws error if hits over length', () => {
-		expect(() => s2.hit()).not.toThrow();
-		expect(() => s2.hit()).not.toThrow();
+		const hitS2 = () => s2.hit();
+		for (let i = 0; i < s2.length; i++) {
+			expect(hitS2).not.toThrow();
+		}
+		expect(hitS2).toThrow();
 
-		expect(() => s2.hit()).toThrow();
+		const hitS5 = () => s5.hit();
+		for (let i = 0; i < s5.length; i++) {
+			expect(hitS5).not.toThrow();
+		}
+		expect(hitS5).toThrow();
+	});
 
-		expect(() => s5.hit()).not.toThrow();
-		expect(() => s5.hit()).not.toThrow();
-		expect(() => s5.hit()).not.toThrow();
-		expect(() => s5.hit()).not.toThrow();
-		expect(() => s5.hit()).not.toThrow();
+	it('returns sunk', () => {
+		expect(s2.isSunk()).toBe(false);
+		for (let i = 0; i < s2.length; i++) {
+			s2.hit();
+		}
+		expect(s2.isSunk()).toBe(true);
 
-		expect(() => s5.hit()).toThrow();
+		expect(s5.isSunk()).toBe(false);
+		for (let i = 0; i < s5.length; i++) {
+			s5.hit();
+		}
+		expect(s5.isSunk()).toBe(true);
 	});
 });
