@@ -51,4 +51,10 @@ describe('ship', () => {
 		}
 		expect(s5.isSunk()).toBe(true);
 	});
+
+	it('places', () => {
+		expect(s2.isPlaced()).toBe(false);
+		s2.place();
+		expect(s2.isPlaced()).toBe(true);
+	});
 });
