@@ -37,14 +37,21 @@ class GameBoard {
 			this.#board.push(new Array(this.#width));
 		}
 	}
+
 	height() {
 		return this.#height;
 	}
+
 	width() {
 		return this.#width;
 	}
+
 	ships() {
 		return this.#ships;
+	}
+
+	board() {
+		return this.#board.map((row) => row.slice());
 	}
 
 	placeShip(ship, start, end) {
@@ -65,8 +72,10 @@ class GameBoard {
 			throw new Error('start or end point is out of bounds of board');
 		}
 
-		const implicitShipLength = Math.abs(start.x - end.x) || Math.abs(start.y - end.y);
-		const actualShipLength = ship.length;
+		let implicitShipLength = Math.abs(start.x - end.x) || Math.abs(start.y - end.y);
+		// [start,end] are inclusive
+		implicitShipLength++;
+		const actualShipLength = ship.length();
 		if (implicitShipLength !== actualShipLength) {
 			throw new Error(
 				`implied ship length does not match actual. got ${implicitShipLength} want ${actualShipLength}`,
