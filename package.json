@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"test": "jest --watchAll",
-		"watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js -watchAll"
+		"watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watchAll"
 	},
 	"keywords": [],
 	"author": "",

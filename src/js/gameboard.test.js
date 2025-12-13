@@ -31,6 +31,38 @@ describe('GameBoard', () => {
 			expect(g.board().length).toBe(10);
 			expect(g.board()[0].length).toBe(10);
 		});
+
+		it('returns hitBoard', () => {
+			expect(g.hitBoard()).not.toBeUndefined();
+			expect(g.hitBoard().length).toBe(10);
+			expect(g.hitBoard()[0].length).toBe(10);
+		});
+	});
+
+	describe('attack', () => {
+		it('attacks empty spot', () => {
+			const attackThreeThree = () => g.attack(3, 3);
+			expect(attackThreeThree).not.toThrow();
+			expect(g.hitBoard()[3][3]).toEqual(true);
+		});
+
+		it('throws when attacking same spot', () => {
+			const attackThreeThree = () => g.attack(3, 3);
+			expect(attackThreeThree).not.toThrow();
+			expect(attackThreeThree).toThrow();
+		});
+
+		it('throws when attacking out of bounds', () => {
+			const attackThreeTen = () => g.attack(3, 10);
+			const attackTenThree = () => g.attack(10, 3);
+			const attackNegX = () => g.attack(-2, 3);
+			const attackNegY = () => g.attack(1, -2);
+
+			expect(attackThreeTen).toThrow();
+			expect(attackTenThree).toThrow();
+			expect(attackNegX).toThrow();
+			expect(attackNegY).toThrow();
+		});
 	});
 
 	describe('places ships', () => {

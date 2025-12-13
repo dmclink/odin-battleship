@@ -20,6 +20,7 @@ class GameBoard {
 	#width;
 	#ships;
 	#board;
+	#hitBoard;
 
 	constructor() {
 		this.#height = 10;
@@ -33,8 +34,10 @@ class GameBoard {
 		this.#ships.set('destroyer', new Ship(2));
 
 		this.#board = [];
+		this.#hitBoard = [];
 		for (let i = 0; i < this.#height; i++) {
 			this.#board.push(new Array(this.#width));
+			this.#hitBoard.push(new Array(this.#width));
 		}
 	}
 
@@ -54,21 +57,32 @@ class GameBoard {
 		return this.#board.map((row) => row.slice());
 	}
 
+	hitBoard() {
+		return this.#hitBoard.map((row) => row.slice());
+	}
+
+	#isOOB(loc) {
+		return loc.x < 0 || loc.x >= this.#width || loc.y < 0 || loc.y >= this.#height;
+	}
+
+	attack(x, y) {
+		if (this.#isOOB(new Loc(x, y))) {
+			throw new Error('attack location is out of bounds');
+		}
+
+		if (this.#hitBoard[y][x] !== undefined) {
+			throw new Error('already attacked this location');
+		}
+
+		this.#hitBoard[y][x] = true;
+	}
+
 	placeShip(ship, start, end) {
 		if (ship.isPlaced()) {
 			throw new Error('ship is already placed');
 		}
 
-		if (
-			start.x < 0 ||
-			end.x < 0 ||
-			start.y < 0 ||
-			end.y < 0 ||
-			start.x >= this.#width ||
-			end.x >= this.#width ||
-			start.y >= this.#height ||
-			end.y >= this.#height
-		) {
+		if (this.#isOOB(start) || this.#isOOB(end)) {
 			throw new Error('start or end point is out of bounds of board');
 		}
 
