@@ -1,4 +1,6 @@
 import { Ship } from './ship.js';
+import { Events } from './events.js';
+import { em } from './eventemitter.js';
 
 class Loc {
 	constructor(x, y) {
@@ -21,17 +23,19 @@ class GameBoard {
 	#ships;
 	#board;
 	#hitBoard;
+	#locked;
 
 	constructor() {
 		this.#height = 10;
 		this.#width = 10;
 
 		this.#ships = new Map();
-		this.#ships.set('carrier', new Ship(5));
-		this.#ships.set('battleship', new Ship(4));
-		this.#ships.set('cruiser', new Ship(3));
-		this.#ships.set('submarine', new Ship(3));
-		this.#ships.set('destroyer', new Ship(2));
+		// TODO: consider getting these sizes and names in constants object and iterating through to set
+		this.#ships.set('carrier', new Ship(5, 'carrier'));
+		this.#ships.set('battleship', new Ship(4, 'battleship'));
+		this.#ships.set('cruiser', new Ship(3, 'cruiser'));
+		this.#ships.set('submarine', new Ship(3, 'submarine'));
+		this.#ships.set('destroyer', new Ship(2, 'destroyer'));
 
 		this.#board = [];
 		this.#hitBoard = [];
@@ -39,6 +43,36 @@ class GameBoard {
 			this.#board.push(new Array(this.#width));
 			this.#hitBoard.push(new Array(this.#width));
 		}
+
+		this.#locked = true;
+	}
+
+	get carrier() {
+		return this.#ships.get('carrier');
+	}
+	get battleship() {
+		return this.#ships.get('battleship');
+	}
+	get cruiser() {
+		return this.#ships.get('cruiser');
+	}
+	get submarine() {
+		return this.#ships.get('submarine');
+	}
+	get destroyer() {
+		return this.#ships.get('destroyer');
+	}
+
+	lock() {
+		this.#locked = true;
+	}
+
+	unlock() {
+		this.#locked = false;
+	}
+
+	isLocked() {
+		return this.#locked;
 	}
 
 	height() {
@@ -49,6 +83,10 @@ class GameBoard {
 		return this.#width;
 	}
 
+	/**
+	 * Returns a map of all ships
+	 * @returns {Map<string, Ship>} - map ship names as strings to their corresponding ship object
+	 */
 	ships() {
 		return this.#ships;
 	}
@@ -65,7 +103,34 @@ class GameBoard {
 		return loc.x < 0 || loc.x >= this.#width || loc.y < 0 || loc.y >= this.#height;
 	}
 
+	receiveAttack(x, y) {
+		if (!this.#board[y][x]) {
+			em.emit(Events.RECEIVED_ATTACK_MISS, x, y);
+			return;
+		}
+
+		const ship = this.#board[y][x];
+		const shipName = ship.name();
+		ship.hit();
+		// TODO: count sunk ships and emit game over instead of received attack?
+
+		if (this.allShipsSunk()) {
+			em.emit(Events.GAME_OVER, x, y);
+			return;
+		}
+
+		if (ship.isSunk()) {
+			em.emit(Events.SHIP_SUNK, x, y, shipName);
+		} else {
+			em.emit(Events.RECEIVED_ATTACK_HIT, x, y, shipName);
+		}
+	}
+
 	attack(x, y) {
+		if (this.isLocked()) {
+			throw new Error('cannot attack right now, must wait your turn');
+		}
+
 		if (this.#isOOB(new Loc(x, y))) {
 			throw new Error('attack location is out of bounds');
 		}
@@ -75,9 +140,19 @@ class GameBoard {
 		}
 
 		this.#hitBoard[y][x] = true;
+
+		em.emit(Events.ATTACK, x, y);
 	}
 
 	placeShip(ship, start, end) {
+		if (!ship) {
+			throw new Error('is not a valid ship');
+		}
+
+		if (this.isLocked()) {
+			throw new Error('cannot place ship, must wait your turn');
+		}
+
 		if (ship.isPlaced()) {
 			throw new Error('ship is already placed');
 		}
@@ -86,9 +161,7 @@ class GameBoard {
 			throw new Error('start or end point is out of bounds of board');
 		}
 
-		let implicitShipLength = Math.abs(start.x - end.x) || Math.abs(start.y - end.y);
-		// [start,end] are inclusive
-		implicitShipLength++;
+		const implicitShipLength = (Math.abs(start.x - end.x) || Math.abs(start.y - end.y)) + 1;
 		const actualShipLength = ship.length();
 		if (implicitShipLength !== actualShipLength) {
 			throw new Error(
@@ -112,6 +185,7 @@ class GameBoard {
 		if (this.#board[curs.y][curs.x] !== undefined) {
 			throw new Error('ships colliding at place ship path');
 		}
+
 		while (!curs.equal(end)) {
 			curs = curs.moveLoc(dX, dY);
 			if (this.#board[curs.y][curs.x] !== undefined) {
@@ -127,6 +201,19 @@ class GameBoard {
 			this.#board[curs.y][curs.x] = ship;
 		}
 		ship.place();
+
+		// TODO: emit all ships placed?
+		// if (ships.placed == this.ships().length)
+	}
+
+	allShipsSunk() {
+		const ships = this.ships().values();
+		for (const ship of ships) {
+			if (!ship.isSunk()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	// printBoard() {

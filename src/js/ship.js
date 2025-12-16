@@ -3,12 +3,18 @@ class Ship {
 	#placed;
 	#hits;
 	#length;
+	#name;
 
-	constructor(length) {
+	constructor(length, name) {
 		this.#hits = 0;
 		this.#length = length;
 		this.#sunk = false;
 		this.#placed = false;
+		this.#name = name;
+	}
+
+	name() {
+		return this.#name;
 	}
 
 	hit() {
@@ -40,6 +46,10 @@ class Ship {
 
 	isSunk() {
 		return this.#sunk;
+	}
+
+	string() {
+		return JSON.stringify({ name: this.#name, placed: this.#placed, hits: this.#hits });
 	}
 }
 

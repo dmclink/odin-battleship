@@ -1,8 +1,38 @@
 import { GameBoard, Loc } from './gameboard.js';
+import { Events } from './events.js';
+import { em } from './eventemitter.js';
+import { jest } from '@jest/globals';
 
 describe('GameBoard', () => {
-	let g;
-	beforeEach(() => (g = new GameBoard()));
+	// helper functions
+	const shipNames = ['carrier', 'battleship', 'cruiser', 'submarine', 'destroyer'];
+	const placeShip = function (board, ship, start, end) {
+		board.placeShip(ship, start, end);
+	};
+
+	const placeAllShips = function (board) {
+		const ships = board.ships();
+		board.unlock();
+
+		for (let col = 0; col < shipNames.length; col++) {
+			const shipName = shipNames[col];
+			const ship = ships.get(shipName);
+			placeShip(board, ship, new Loc(col, 0), new Loc(col, ship.length() - 1));
+		}
+	};
+	const hitAllShips = function (board) {
+		const ships = board.ships();
+
+		for (let col = 0; col < shipNames.length; col++) {
+			const shipName = shipNames[col];
+			const ship = ships.get(shipName);
+			for (let row = 0; row < ship.length(); row++) board.receiveAttack(col, row);
+		}
+	};
+	let g = new GameBoard();
+	beforeEach(() => {
+		g = new GameBoard();
+	});
 
 	describe('initializes correctly', () => {
 		it('initializes to correct size', () => {
@@ -40,6 +70,16 @@ describe('GameBoard', () => {
 	});
 
 	describe('attack', () => {
+		beforeEach(() => {
+			g.unlock();
+		});
+
+		it('throw when gameboard locked', () => {
+			g.lock();
+			const attackThreeThree = () => g.attack(3, 3);
+			expect(attackThreeThree).toThrow();
+		});
+
 		it('attacks empty spot', () => {
 			const attackThreeThree = () => g.attack(3, 3);
 			expect(attackThreeThree).not.toThrow();
@@ -63,9 +103,67 @@ describe('GameBoard', () => {
 			expect(attackNegX).toThrow();
 			expect(attackNegY).toThrow();
 		});
+
+		it('emits attack', () => {
+			const mockListener = jest.fn();
+			em.on(Events.ATTACK, mockListener);
+			const x = 4;
+			const y = 7;
+			g.attack(x, y);
+
+			expect(mockListener).toHaveBeenCalledTimes(1);
+			expect(mockListener).toHaveBeenCalledWith(x, y);
+		});
+	});
+
+	describe('locks and unlocks', () => {
+		it('defaluts to locked state', () => {
+			expect(g.isLocked()).toBe(true);
+		});
+
+		// doesn't do anything if calling lock when already locked
+		it("doesn't do anything if calling lock when already locked", () => {
+			g.lock();
+			expect(g.isLocked()).toBe(true);
+		});
+
+		it('unlocks when locked', () => {
+			g.unlock();
+			expect(g.isLocked()).toBe(false);
+		});
+
+		it('doesnt do anything when unlock called when already unlocked', () => {
+			g.unlock();
+			expect(g.isLocked()).toBe(false);
+		});
+
+		it('locks when unlocked', () => {
+			g.lock();
+			expect(g.isLocked()).toBe(true);
+		});
 	});
 
 	describe('places ships', () => {
+		beforeEach(() => {
+			g.unlock();
+		});
+		it('throws error when invalid ship', () => {
+			const ship = g.ships().get('bootleship');
+			const placeUndefined = () => g.placeShip(ship, new Loc(0, 0), new Loc(0, 3));
+			expect(placeUndefined).toThrow();
+		});
+
+		it('throw error when locked', () => {
+			g.lock();
+			const carrier = g.ships().get('carrier');
+			const createPlaceFunc = function (start, end) {
+				return () => {
+					g.placeShip(carrier, start, end);
+				};
+			};
+			expect(createPlaceFunc(new Loc(4, 4), new Loc(8, 4))).toThrow();
+		});
+
 		it('placeShip happy path', () => {
 			const carrier = g.ships().get('carrier');
 			const carrierY = 4;
@@ -133,5 +231,150 @@ describe('GameBoard', () => {
 			const placeFunc = () => g.placeShip(carrier, new Loc(3, 3), new Loc(7, 3));
 			expect(placeFunc).toThrow();
 		});
+	});
+
+	describe('receiveAttack', () => {
+		it('receives attack on ship', () => {
+			g.unlock();
+			g.placeShip(g.carrier, new Loc(0, 0), new Loc(0, g.carrier.length() - 1));
+			g.lock();
+
+			let currentHits = g.carrier.hits();
+			let expectedHits = 0;
+			expect(currentHits).toBe(expectedHits);
+
+			g.receiveAttack(0, 0);
+			currentHits = g.carrier.hits();
+			expectedHits++;
+			expect(currentHits).toBe(expectedHits);
+
+			g.receiveAttack(0, 1);
+			currentHits = g.carrier.hits();
+			expectedHits++;
+			expect(currentHits).toBe(expectedHits);
+		});
+
+		it('receives miss attack', () => {
+			g.unlock();
+			g.placeShip(g.carrier, new Loc(0, 0), new Loc(0, g.carrier.length() - 1));
+			g.lock();
+
+			let currentHits = g.carrier.hits();
+			const expectedHits = 0;
+			expect(currentHits).toBe(expectedHits);
+
+			g.receiveAttack(1, 0);
+			currentHits = g.carrier.hits();
+
+			expect(currentHits).toBe(expectedHits);
+		});
+
+		it('emits hit event', () => {
+			const hitListener = jest.fn();
+			const missListener = jest.fn();
+			const sunkListener = jest.fn();
+			em.on(Events.RECEIVED_ATTACK_HIT, hitListener);
+			em.on(Events.RECEIVED_ATTACK_MISS, missListener);
+			em.on(Events.SHIP_SUNK, sunkListener);
+
+			g.unlock();
+			g.placeShip(g.carrier, new Loc(0, 0), new Loc(0, g.carrier.length() - 1));
+			g.lock();
+
+			const x = 0;
+			const y = 0;
+			g.receiveAttack(x, y);
+			expect(hitListener).toHaveBeenCalledTimes(1);
+			expect(hitListener).toHaveBeenLastCalledWith(x, y, 'carrier');
+
+			g.receiveAttack(0, 1);
+			expect(hitListener).toHaveBeenCalledTimes(2);
+			expect(missListener).toHaveBeenCalledTimes(0);
+			expect(sunkListener).toHaveBeenCalledTimes(0);
+		});
+
+		it('emits miss event', () => {
+			const hitListener = jest.fn();
+			const missListener = jest.fn();
+			const sunkListener = jest.fn();
+			em.on(Events.RECEIVED_ATTACK_HIT, hitListener);
+			em.on(Events.RECEIVED_ATTACK_MISS, missListener);
+			em.on(Events.SHIP_SUNK, sunkListener);
+
+			g.unlock();
+			g.placeShip(g.carrier, new Loc(0, 0), new Loc(0, g.carrier.length() - 1));
+			g.lock();
+
+			const x = 1;
+			const y = 0;
+			g.receiveAttack(x, y);
+			expect(missListener).toHaveBeenCalledTimes(1);
+			expect(missListener).toHaveBeenLastCalledWith(x, y);
+
+			g.receiveAttack(9, 9);
+			expect(missListener).toHaveBeenCalledTimes(2);
+			expect(hitListener).toHaveBeenCalledTimes(0);
+			expect(sunkListener).toHaveBeenCalledTimes(0);
+		});
+
+		it('emits sunk event', () => {
+			const sunkListener = jest.fn();
+			em.on(Events.SHIP_SUNK, sunkListener);
+
+			const col = 0;
+			g.unlock();
+			g.placeShip(g.carrier, new Loc(col, 0), new Loc(col, g.carrier.length() - 1));
+			g.lock();
+
+			// should hit every location but the last
+			for (let row = 0; row < g.carrier.length() - 1; row++) {
+				g.receiveAttack(col, row);
+			}
+			expect(sunkListener).toHaveBeenCalledTimes(0);
+
+			g.receiveAttack(col, g.carrier.length() - 1);
+			expect(sunkListener).toHaveBeenCalledTimes(1);
+		});
+
+		it('emits game over event', () => {
+			const gameOverListener = jest.fn();
+			const sunkListener = jest.fn();
+			const hitListener = jest.fn();
+			em.on(Events.GAME_OVER, gameOverListener);
+			em.on(Events.SHIP_SUNK, sunkListener);
+			em.on(Events.RECEIVED_ATTACK_HIT, hitListener);
+
+			g.unlock();
+			placeAllShips(g);
+			hitAllShips(g);
+			expect(gameOverListener).toHaveBeenCalledTimes(1);
+			// 5 total ships but game over listener gets called instead of last sunk listener
+			expect(sunkListener).toHaveBeenCalledTimes(g.ships().size - 1);
+			const expectedShipHits =
+				g
+					.ships()
+					.values()
+					.reduce((acc, curr) => acc + curr.length(), 0) - g.ships().size;
+			expect(hitListener).toHaveBeenCalledTimes(expectedShipHits);
+		});
+	});
+
+	it('ships arent undefined', () => {
+		expect(g.carrier).not.toBeUndefined();
+		expect(g.battleship).not.toBeUndefined();
+		expect(g.cruiser).not.toBeUndefined();
+		expect(g.submarine).not.toBeUndefined();
+		expect(g.destroyer).not.toBeUndefined();
+	});
+
+	it('returns allShipsSunk only after all ships have been hit max hits', () => {
+		const ships = g.ships();
+		for (const ship of ships.values()) {
+			while (!ship.isSunk()) {
+				expect(g.allShipsSunk()).toBe(false);
+				ship.hit();
+			}
+		}
+		expect(g.allShipsSunk()).toBe(true);
 	});
 });
