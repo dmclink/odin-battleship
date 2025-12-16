@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script type="module" src="../js/index.js"></script>
+    <script type="module" src="../js/tray.js" defer></script>
+  </head>
+  <body class="body">
+    <!-- FIX: remove class hidden  -->
+    <div class="welcome-screen hidden" , id="welcome-screen">
+      <div class="welcome-text">
+        <h1 class="welcome-title">BATTLESHIP</h1>
+        <div class="welcome-btn-grp">
+          <button class="welcome-player-mode" id="welcome-1-player-mode">P1</button>
+          <button class="welcome-player-mode" id="welcome-2-player-mode">P2</button>
+        </div>
+        <p>Select number of players to start</p>
+      </div>
+    </div>
+    <!-- FIX: add class hidden  -->
+    <main class="main" id="main">
+      <div class="board-screen" id="board-screen">
+        <div class="board" id="board">
+          <!-- cube walls are for debugging, can delete later  -->
+          <div class="cube-wall">mid</div>
+          <div class="cube-wall back">back</div>
+          <div class="cube-wall front">front</div>
+          <div class="cube-wall bottom">bottom</div>
+          <div class="cube-wall top">top</div>
+          <div class="cube-wall left">left</div>
+          <div class="cube-wall right">right</div>
+
+          <board-tray class="ship-board">
+            <ship-grid></ship-grid>
+          </board-tray>
+          <board-tray class="hit-board">
+            <hit-grid></hit-grid>
+          </board-tray>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
