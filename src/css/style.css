@@ -206,12 +206,12 @@ summary {
 	width: var(--size);
 	height: var(--size);
 	/* for debugging  */
-	transform: rotate3d(1, 1.2, 0.3, -30deg);
+	/* transform: rotate3d(1, 1.2, 0.3, -30deg); */
 	/* transform: rotate3d(0, 1, 0, -100deg); */
 	/* transform: rotate3d(1, 1.2, 0.3, -90deg); */
 	/* transform: rotate3d(-0.1, 1, 0.1, -100deg); */
 	/* transform: rotate3d(-0.1, 1, 0.1, -70deg); */
-	/* transform: translateY(5rem) rotate3d(1, 0, 0, -16deg); */
+	transform: translateY(5rem) rotate3d(1, 0, 0, -16deg);
 	position: relative;
 	transform-style: preserve-3d;
 	margin: 0 auto;
@@ -223,73 +223,6 @@ board-tray {
 	height: var(--tray-size);
 	width: var(--tray-size);
 	transform-style: preserve-3d;
-}
-
-.tray {
-	position: absolute;
-	width: var(--tray-size);
-	height: var(--tray-size);
-	transform-style: preserve-3d;
-}
-
-.tray > * {
-	position: absolute;
-}
-.tray-face-container {
-	width: 100%;
-	height: 100%;
-	padding: var(--tray-depth);
-}
-
-.tray-face {
-	height: 100%;
-	width: 100%;
-	&.front {
-		transform: translateZ(var(--tray-depth));
-	}
-}
-
-.tray-face.front {
-	background-color: #2222aa;
-}
-
-.tray-rim-edge {
-	position: absolute;
-	background-color: #4468ea;
-	box-shadow: 0 0 5px inset black;
-}
-
-.tray-rim {
-	--mid: calc(var(--tray-depth) / 2);
-	height: 100%;
-	width: var(--tray-depth);
-	transform-style: preserve-3d;
-
-	&.right {
-		right: 0;
-	}
-	&.top {
-		transform-origin: 50% calc(100% - var(--mid));
-		transform: rotateZ(90deg);
-	}
-	&.bottom {
-		transform-origin: 50% calc(0% + var(--mid));
-		transform: rotateZ(-90deg);
-	}
-}
-
-.tray-rim-edge {
-	height: 100%;
-	width: 100%;
-	&.left {
-		transform: translateZ(var(--mid)) rotateY(90deg) translateZ(var(--mid));
-	}
-	&.right {
-		transform: translateZ(var(--mid)) rotateY(90deg) translateZ(calc(-1 * var(--mid)));
-	}
-	&.top {
-		transform: translateZ(var(--tray-depth));
-	}
 }
 
 .ship-board,

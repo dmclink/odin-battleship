@@ -1,37 +1,21 @@
-const text = `
-  <div class="tray">
-    <div class="tray-face-container back">
-      <div class="tray-face"></div>
-    </div>
-    <div class="tray-face-container front">
-      <div class="tray-face front"></div>
-    </div>
-    <div class="tray-rim left">
-      <div class="tray-rim-edge left"></div>
-      <div class="tray-rim-edge right"></div>
-      <div class="tray-rim-edge top"></div>
-    </div>
-    <div class="tray-rim right">
-      <div class="tray-rim-edge left"></div>
-      <div class="tray-rim-edge right"></div>
-      <div class="tray-rim-edge top"></div>
-    </div>
-    <div class="tray-rim top">
-      <div class="tray-rim-edge left"></div>
-      <div class="tray-rim-edge right"></div>
-      <div class="tray-rim-edge top"></div>
-    </div>
-    <div class="tray-rim bottom">
-      <div class="tray-rim-edge left"></div>
-      <div class="tray-rim-edge right"></div>
-      <div class="tray-rim-edge top"></div>
-    </div>
-  </div>`;
-
 class BoardTray extends HTMLElement {
 	constructor() {
 		super();
-		this.innerHTML = text;
+		this.attachShadow({ mode: 'open' });
+	}
+
+	async connectedCallback() {
+		const resp = await fetch('../html/tray.html');
+		const text = await resp.text();
+
+		const tempContainer = document.createElement('div');
+		tempContainer.innerHTML = text;
+
+		console.log(tempContainer);
+		const template = tempContainer.querySelector('#board-tray-template');
+		const templateContent = template.content;
+
+		this.shadowRoot.appendChild(templateContent.cloneNode(true));
 	}
 }
 
