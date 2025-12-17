@@ -1,0 +1,13 @@
+<template id="rotate-3d-template">
+  <div class="rotate-3d-template">
+    <label for="rotate-x">X:</label>
+    <input type="range" name="rotate-x" id="rotate-x" min="0" max="360" />
+    <label for="rotate-y">Y:</label>
+    <input type="range" name="rotate-y" id="rotate-y" min="0" max="360" />
+    <label for="rotate-z">Z:</label>
+    <input type="range" name="rotate-z" id="rotate-z" min="0" max="360" />
+    <label for="perspective">P:</label>
+    <input type="range" name="perspective" id="perspective" />
+    <slot name="scene-3d"></slot>
+  </div>
+</template>

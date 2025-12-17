@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../css/style.css" />
     <script type="module" src="../js/index.js"></script>
     <script type="module" src="../js/tray.js" defer></script>
+    <script type="module" src="../js/rotate-3d.js" defer></script>
   </head>
   <body class="body">
     <!-- FIX: remove class hidden  -->
@@ -22,32 +23,27 @@
     </div>
     <!-- FIX: add class hidden  -->
     <main class="main" id="main">
-      <div class="3d-screen">
-        <input type="range" name="rotate-x" id="rotate-x" min="0" max="360" />
-        <input type="range" name="rotate-y" id="rotate-y" min="0" max="360" />
-        <input type="range" name="rotate-z" id="rotate-z" min="0" max="360" />
-        <input type="range" name="perspective" id="perspective" />
-      </div>
+      <rotate-3d>
+        <div slot="scene-3d" class="board-screen" id="board-screen">
+          <div class="board" id="board">
+            <!-- cube walls are for debugging, can delete later  -->
+            <div class="cube-wall">mid</div>
+            <div class="cube-wall back">back</div>
+            <div class="cube-wall front">front</div>
+            <div class="cube-wall bottom">bottom</div>
+            <div class="cube-wall top">top</div>
+            <div class="cube-wall left">left</div>
+            <div class="cube-wall right">right</div>
 
-      <div class="board-screen" id="board-screen">
-        <div class="board" id="board">
-          <!-- cube walls are for debugging, can delete later  -->
-          <div class="cube-wall">mid</div>
-          <div class="cube-wall back">back</div>
-          <div class="cube-wall front">front</div>
-          <div class="cube-wall bottom">bottom</div>
-          <div class="cube-wall top">top</div>
-          <div class="cube-wall left">left</div>
-          <div class="cube-wall right">right</div>
-
-          <board-tray class="ship-board">
-            <ship-grid></ship-grid>
-          </board-tray>
-          <board-tray class="hit-board">
-            <hit-grid></hit-grid>
-          </board-tray>
+            <board-tray class="ship-board">
+              <ship-grid></ship-grid>
+            </board-tray>
+            <board-tray class="hit-board">
+              <hit-grid></hit-grid>
+            </board-tray>
+          </div>
         </div>
-      </div>
+      </rotate-3d>
     </main>
   </body>
 </html>
