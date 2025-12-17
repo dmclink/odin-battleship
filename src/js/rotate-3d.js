@@ -40,19 +40,19 @@ class Rotate3D extends HTMLElement {
 				console.log(this);
 				obj.style.perspective = `${pVal}px`;
 			};
-			xSlider.addEventListener('input', (e) => {
+			xSlider.addEventListener('input', () => {
 				xVal = xSlider.value;
 				updateTransform();
 			});
-			ySlider.addEventListener('input', (e) => {
+			ySlider.addEventListener('input', () => {
 				yVal = ySlider.value;
 				updateTransform();
 			});
-			zSlider.addEventListener('input', (e) => {
+			zSlider.addEventListener('input', () => {
 				zVal = zSlider.value;
 				updateTransform();
 			});
-			pSlider.addEventListener('input', (e) => {
+			pSlider.addEventListener('input', () => {
 				pVal = pSlider.value;
 				updatePerspective();
 			});
