@@ -119,6 +119,7 @@ export class Cylinder3D extends HTMLElement {
 					top.style.backgroundColor = color;
 					top.style.transformOrigin = '50% 0%';
 					top.style.transform = `rotateX(90deg) rotateZ(${degree}deg)`;
+					top.style.borderBottom = border;
 					container.appendChild(top);
 
 					const bottom = document.createElement('div');
@@ -128,6 +129,7 @@ export class Cylinder3D extends HTMLElement {
 					bottom.style.backgroundColor = color;
 					bottom.style.transformOrigin = '50% 0%';
 					bottom.style.transform = `translateY(${height}px) rotateX(90deg) rotateZ(${degree}deg)`;
+					bottom.style.borderBottom = border;
 					container.appendChild(bottom);
 				}
 			}
