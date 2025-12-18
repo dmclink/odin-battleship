@@ -31,13 +31,11 @@ class Rotate3D extends HTMLElement {
 			let zVal = zSlider.value;
 			let pVal = pSlider.value;
 
-			console.log('this:', this);
 			const updateTransform = function () {
 				obj.style.transform = `rotateX(${xVal}deg) rotateY(${yVal}deg) rotateZ(${zVal}deg)`;
 			};
 
 			const updatePerspective = () => {
-				console.log(this);
 				obj.style.perspective = `${pVal}px`;
 			};
 			xSlider.addEventListener('input', () => {

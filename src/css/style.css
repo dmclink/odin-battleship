@@ -202,6 +202,30 @@ summary {
 	}
 }
 
+cylinder-3d {
+	height: 100px;
+	width: 300px;
+}
+
+hinge-3d {
+	--bgc: #4468ea;
+	--hinge-height: calc(var(--tray-size) * 0.3);
+	height: var(--hinge-height);
+	width: var(--hinge-size);
+
+	position: absolute;
+	&.hinge-left {
+		transform: rotateX(90deg) rotateZ(90deg) translateX(calc(-1 * var(--mid) + var(--hinge-size) / 2))
+			translateZ(calc(-1 * var(--mid) + var(--hinge-size) / 2))
+			translateY(calc(var(--tray-size) / 2 - var(--hinge-height) / 2));
+	}
+	&.hinge-right {
+		transform: rotateX(90deg) rotateZ(90deg) translateX(calc(-1 * var(--mid) + var(--hinge-size) / 2))
+			translateZ(calc(-1 * var(--mid) + var(--hinge-size) / 2))
+			translateY(calc(-1 * var(--tray-size) / 2 + var(--hinge-height) / 2));
+	}
+}
+
 .board {
 	width: var(--size);
 	height: var(--size);
