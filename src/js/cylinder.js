@@ -17,10 +17,9 @@ export class Cylinder3D extends HTMLElement {
 
 			const temp = document.createElement('div');
 			temp.innerHTML = text;
-			const template = temp.querySelector('#cylinder-3d-template');
-			const clone = template.cloneNode(true);
 
-			const cylinder = clone.content.cloneNode(true);
+			const cylinder = temp.querySelector('#cylinder-3d-template').content.cloneNode(true);
+			const container = cylinder.querySelector('.cylinder__container');
 
 			this.shadowRoot.appendChild(cylinder);
 
@@ -37,8 +36,8 @@ export class Cylinder3D extends HTMLElement {
 
 			const degreeStep = 360 / sides;
 
-			const container = document.createElement('div');
-			container.classList.add('container');
+			// const container = document.createElement('div');
+			// container.classList.add('container');
 
 			for (let i = 0, degree = 0; i < sides; i++, degree += degreeStep) {
 				const side = document.createElement('div');
