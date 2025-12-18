@@ -82,7 +82,7 @@ export class Cylinder3D extends HTMLElement {
 					container.appendChild(side);
 				}
 
-				// build the caps
+				// build the inner ring caps
 				for (let i = 0, degree = 0; i < sides; i++, degree += degreeStep) {
 					const top = document.createElement('div');
 					top.style.width = `${sideLength}px`;
@@ -129,6 +129,11 @@ export class Cylinder3D extends HTMLElement {
 					top.style.transformOrigin = '50% 0%';
 					top.style.transform = `rotateX(90deg) rotateZ(${degree}deg)`;
 					top.style.borderBottom = border;
+					if (this.hasAttribute('shadow-both-caps') || this.hasAttribute('shadow-top-cap')) {
+						const brightnessVal =
+							this.getAttribute('shadow-both-caps') || this.getAttribute('shadow-top-cap') || 0.7;
+						top.style.filter = `brightness(${brightnessVal})`;
+					}
 					container.appendChild(top);
 
 					const bottom = document.createElement('div');
@@ -139,6 +144,11 @@ export class Cylinder3D extends HTMLElement {
 					bottom.style.transformOrigin = '50% 0%';
 					bottom.style.transform = `translateY(${height}px) rotateX(90deg) rotateZ(${degree}deg)`;
 					bottom.style.borderBottom = border;
+					if (this.hasAttribute('shadow-both-caps') || this.hasAttribute('shadow-bottom-cap')) {
+						const brightnessVal =
+							this.getAttribute('shadow-both-caps') || this.getAttribute('shadow-bottom-cap') || 0.7;
+						bottom.style.filter = `brightness(${brightnessVal})`;
+					}
 					container.appendChild(bottom);
 				}
 			}
