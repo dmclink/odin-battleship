@@ -29,7 +29,8 @@ export class Cylinder3D extends HTMLElement {
 			const height = this.offsetHeight;
 			const radius = width / 2;
 
-			const color = this.getAttribute('color') || 'black';
+			// const color = this.getAttribute('color') || 'black';
+			const color = `var(--bgc, ${this.getAttribute('color') || 'black'})`;
 
 			// +1 here in case of higher side counts will not look continuously connected
 			const sideLength = calculateSideLength(sides, radius) + 1;
@@ -44,7 +45,6 @@ export class Cylinder3D extends HTMLElement {
 				side.style.width = `${sideLength}px`;
 				side.style.height = `${height}px`;
 				side.style.position = 'absolute';
-				// TODO: pull color from attributes
 				side.style.backgroundColor = color;
 				side.style.transform = `rotateY(${degree}deg) translateZ(${radius}px)`;
 				container.appendChild(side);
