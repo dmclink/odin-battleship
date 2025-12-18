@@ -4,7 +4,7 @@ function calculateSideLength(sides, radius) {
 	return Math.round(2 * radius * Math.tan(radians / sides));
 }
 
-class Cylinder3D extends HTMLElement {
+export class Cylinder3D extends HTMLElement {
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -24,7 +24,7 @@ class Cylinder3D extends HTMLElement {
 
 			this.shadowRoot.appendChild(cylinder);
 
-			const sides = this.getAttribute('sides');
+			const sides = this.getAttribute('sides') || 50;
 			const width = this.offsetWidth;
 			const height = this.offsetHeight;
 			const radius = width / 2;
