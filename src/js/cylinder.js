@@ -92,6 +92,11 @@ export class Cylinder3D extends HTMLElement {
 					top.style.transformOrigin = `50% 0%`;
 					top.style.transform = `rotateX(90deg) rotateZ(${degree}deg) translateY(${holeDiameter}px)`;
 					top.style.borderBottom = border;
+					if (this.hasAttribute('shadow-both-caps') || this.hasAttribute('shadow-top-cap')) {
+						const brightnessVal =
+							this.getAttribute('shadow-both-caps') || this.getAttribute('shadow-top-cap') || 0.7;
+						top.style.filter = `brightness(${brightnessVal})`;
+					}
 					container.appendChild(top);
 
 					const bottom = document.createElement('div');
@@ -101,8 +106,12 @@ export class Cylinder3D extends HTMLElement {
 					bottom.style.backgroundColor = color;
 					bottom.style.transformOrigin = `50% 0%`;
 					bottom.style.transform = `rotateX(90deg) rotateZ(${degree}deg) translateY(${holeDiameter}px) translateZ(${-height}px)`;
-
 					bottom.style.borderBottom = border;
+					if (this.hasAttribute('shadow-both-caps') || this.hasAttribute('shadow-bottom-cap')) {
+						const brightnessVal =
+							this.getAttribute('shadow-both-caps') || this.getAttribute('shadow-bottom-cap') || 0.7;
+						bottom.style.filter = `brightness(${brightnessVal})`;
+					}
 
 					container.appendChild(bottom);
 				}
