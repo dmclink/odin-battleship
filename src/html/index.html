@@ -10,6 +10,8 @@
     <script type="module" src="../js/rotate-3d.js" defer></script>
     <!-- <script type="module" src="../js/cylinder.js" defer></script> -->
     <script type="module" src="../js/hinge.js" defer></script>
+    <script type="module" src="../js/cube.js" defer></script>
+    <script type="module" src="../js/cube-holed.js" defer></script>
   </head>
   <body class="body">
     <!-- FIX: remove class hidden  -->
@@ -26,27 +28,39 @@
     <!-- FIX: add class hidden  -->
     <main class="main" id="main">
       <rotate-3d>
-        <div slot="obj-3d" class="board-screen" id="board-screen">
-          <div class="board" id="board">
-            <!-- cube walls are for debugging, can delete later 
+        <cube-holed-3d hole-size="50" class="cube-3d" slot="obj-3d"></cube-holed-3d>
+        <!-- <cube-3d class="cube-3d" slot="obj-3d"></cube-3d> -->
+
+        <!-- <cylinder-3d -->
+        <!--   slot="obj-3d" -->
+        <!--   sides="40" -->
+        <!--   inner-thickness="0.5" -->
+        <!--   color="blue" -->
+        <!--   border="1px solid black" -->
+        <!--   shadow-inner="0.6"></cylinder-3d> -->
+
+        <!-- <div slot="obj-3d" class="board-screen" id="board-screen"> -->
+        <!--   <div class="board" id="board"> -->
+        <!--     <!-- cube walls are for debugging, can delete later  -->
+        <!-- -->
         -->
-            <div class="cube-wall">mid</div>
-            <div class="cube-wall back">back</div>
-            <div class="cube-wall front">front</div>
-            <div class="cube-wall bottom">bottom</div>
-            <div class="cube-wall top">top</div>
-            <div class="cube-wall left">left</div>
-            <div class="cube-wall right">right</div>
-            <hinge-3d class="hinge-left" slot="obj-3d" num-cylinders="3" gap-size="10px"></hinge-3d>
-            <hinge-3d class="hinge-right" slot="obj-3d" num-cylinders="3" gap-size="10px"></hinge-3d>
-            <board-tray class="ship-board">
-              <ship-grid></ship-grid>
-            </board-tray>
-            <board-tray class="hit-board">
-              <hit-grid></hit-grid>
-            </board-tray>
-          </div>
-        </div>
+        <!--     <div class="cube-wall">mid</div> -->
+        <!--     <div class="cube-wall back">back</div> -->
+        <!--     <div class="cube-wall front">front</div> -->
+        <!--     <div class="cube-wall bottom">bottom</div> -->
+        <!--     <div class="cube-wall top">top</div> -->
+        <!--     <div class="cube-wall left">left</div> -->
+        <!--     <div class="cube-wall right">right</div> -->
+        <!--     <hinge-3d class="hinge-left" slot="obj-3d" num-cylinders="3" gap-size="10px"></hinge-3d> -->
+        <!--     <hinge-3d class="hinge-right" slot="obj-3d" num-cylinders="3" gap-size="10px"></hinge-3d> -->
+        <!--     <board-tray class="ship-board"> -->
+        <!--       <ship-grid></ship-grid> -->
+        <!--     </board-tray> -->
+        <!--     <board-tray class="hit-board"> -->
+        <!--       <hit-grid></hit-grid> -->
+        <!--     </board-tray> -->
+        <!--   </div> -->
+        <!-- </div> -->
       </rotate-3d>
     </main>
   </body>

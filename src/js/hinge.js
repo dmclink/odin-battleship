@@ -15,7 +15,7 @@ export class Hinge3D extends HTMLElement {
 			tempNode.innerHTML = text;
 
 			const hinge = tempNode.querySelector('#hinge-3d-template').content.cloneNode(true);
-			const container = hinge.querySelector('.container');
+			const container = hinge.querySelector('.hinge__container');
 
 			let numCylinders = Number(this.getAttribute('num-cylinders'));
 
