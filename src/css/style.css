@@ -214,6 +214,12 @@ cube-holed-3d {
 	width: 10rem;
 }
 
+cube-cyl-3d {
+	--bgc: #44c9eaaa;
+	height: 5rem;
+	width: 10rem;
+}
+
 cylinder-3d {
 	height: 100px;
 	width: 300px;
