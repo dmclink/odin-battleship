@@ -45,13 +45,18 @@ class Cube3D extends HTMLElement {
 
 		const color = `var(--bgc, ${this.getAttribute('color') || 'black'})`;
 
+		let border;
+		if (this.hasAttribute('border')) {
+			border = this.getAttribute('border') || '1px solid black';
+		}
+
 		for (let i = 0; i < 6; i++) {
 			const face = document.createElement('div');
 			// the last two pieces are the top and bottom, so they must be full squares
 			face.style.height = i >= 4 ? `${width}px` : `${height}px`;
 			face.style.width = `${width}px`;
 			face.style.backgroundColor = color;
-			face.style.border = '1px solid black';
+			face.style.border = border;
 			this.faces.push(face);
 			container.appendChild(face);
 		}

@@ -192,6 +192,13 @@ export class Cylinder3D extends HTMLElement {
 		this.render(width, height);
 	}
 
+	rebuildWithoutDimensions() {
+		const width = this.offsetWidth;
+		const height = this.offsetHeight;
+		this.removeCylinderSides();
+		this.render(width, height);
+	}
+
 	removeCylinderSides() {
 		const container = this.shadowRoot.querySelector('.cylinder__container');
 		const sides = Array.from(this.shadowRoot.querySelectorAll('.cylinder__side'));

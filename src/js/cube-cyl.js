@@ -37,6 +37,9 @@ const text = `
 `;
 
 class CubeCyl3D extends HTMLElement {
+	#cube;
+	#color;
+
 	constructor() {
 		super();
 		const shadowRoot = this.attachShadow({ mode: 'open' });
@@ -49,6 +52,11 @@ class CubeCyl3D extends HTMLElement {
 		const container = cubeCyl.querySelector('.cube-cyl__container');
 
 		const cube = container.querySelector('cube-3d');
+
+		const color = this.getAttribute('--bgc');
+
+		this.#cube = cube;
+		this.#color = color;
 
 		cube.setAttribute('--bgc', 'transparent');
 		const cyl = container.querySelector('cylinder-3d');
@@ -70,6 +78,23 @@ class CubeCyl3D extends HTMLElement {
 		cyl.setAttribute('shadow-inner', '0.6');
 
 		cyl.rebuild(cylWidth, this.offsetHeight);
+
+		// this.addEventListener('mouseenter', (e) => {
+		// 	e.stopPropagation();
+		// 	e.preventDefault();
+		// 	this.applyHoverColor('#b21f1f33');
+		// });
+		// this.addEventListener('mouseleave', (e) => {
+		// 	e.stopPropagation();
+		// 	e.preventDefault();
+		// 	this.applyHoverColor('transparent');
+		// });
+	}
+
+	applyHoverColor(color) {
+		this.#cube.getFaces().forEach((face) => {
+			face.style.backgroundColor = color;
+		});
 	}
 }
 

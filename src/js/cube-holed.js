@@ -50,6 +50,8 @@ class CubeHoled3D extends HTMLElement {
 		const cube = container.querySelector('cube-3d');
 		const hole = container.querySelector('cylinder-3d');
 
+		cube.setAttribute('border', '1px solid black');
+
 		// append it before checking sizes
 		shadowRoot.appendChild(cubeHoled);
 
