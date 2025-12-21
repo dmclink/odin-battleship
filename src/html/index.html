@@ -13,6 +13,9 @@
     <script type="module" src="../js/cube.js" defer></script>
     <script type="module" src="../js/cube-holed.js" defer></script>
     <script type="module" src="../js/cube-cyl.js" defer></script>
+    <script type="module" src="../js/ship-grid.js" defer></script>
+    <script type="module" src="../js/ship-board.js" defer></script>
+    <script type="module" src="../js/hit-board.js" defer></script>
   </head>
   <body class="body">
     <!-- FIX: remove class hidden  -->
@@ -43,27 +46,34 @@
 
         <div slot="obj-3d" class="board-screen" id="board-screen">
           <div class="board" id="board">
-            <!--     <!-- cube walls are for debugging, can delete later  -->
-            <!-- -->
-            -->
-            <div class="cube-wall">mid</div>
+            <!-- cube walls are for debugging, can delete later  -->
+            <!-- <div class="cube-wall">mid</div> -->
             <div class="cube-wall back">back</div>
             <div class="cube-wall front">front</div>
             <div class="cube-wall bottom">bottom</div>
             <div class="cube-wall top">top</div>
             <div class="cube-wall left">left</div>
             <div class="cube-wall right">right</div>
+
             <hinge-3d class="hinge-left" slot="obj-3d" num-cylinders="3" gap-size="10px"></hinge-3d>
             <hinge-3d class="hinge-right" slot="obj-3d" num-cylinders="3" gap-size="10px"></hinge-3d>
-            <board-tray class="ship-board">
-              <ship-grid></ship-grid>
-            </board-tray>
-            <board-tray class="hit-board">
-              <hit-grid></hit-grid>
-            </board-tray>
+            <ship-board class="ship-board"></ship-board>
+            <hit-board class="hit-board"></hit-board>
+            <!-- <board-tray class="ship-board"> -->
+            <!-- <ship-grid slot="grid"></ship-grid> -->
+            <!-- </board-tray> -->
+
+            <!-- <board-tray class="hit-board"> -->
+            <!--   <hit-grid></hit-grid> -->
+            <!-- </board-tray> -->
           </div>
         </div>
       </rotate-3d>
+      <!-- <rotate-3d> -->
+      <!--   <div class="board-screen" slot="obj-3d"> -->
+      <!--     <cube-cyl-3d></cube-cyl-3d> -->
+      <!--   </div> -->
+      <!-- </rotate-3d> -->
     </main>
   </body>
 </html>

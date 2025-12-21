@@ -22,7 +22,7 @@ const text = `
     <input type="range" name="rotate-z" id="rotate-z" min="-180" max="180" value="0" />
 
     <label for="perspective">P:</label>
-    <input type="range" name="perspective" id="perspective" min="1" max="5000" value="800" />
+    <input type="range" name="perspective" id="perspective" min="1" max="10000" value="5000" />
   </div>
   <slot name="obj-3d" id="obj-3d"></slot>
 </template>
@@ -81,63 +81,6 @@ class Rotate3D extends HTMLElement {
 			updatePerspective();
 		});
 	}
-
-	// async connectedCallback() {
-	// 	try {
-	// 		const resp = await fetch('../html/rotate-3d.html');
-	// 		const text = await resp.text();
-	//
-	// 		const tempContainer = document.createElement('div');
-	// 		tempContainer.innerHTML = text;
-	//
-	// 		const template = tempContainer.querySelector('#rotate-3d-template');
-	//
-	// 		const rotator = document.importNode(template.content, true);
-	// 		const xSlider = rotator.querySelector('#rotate-x');
-	// 		const ySlider = rotator.querySelector('#rotate-y');
-	// 		const zSlider = rotator.querySelector('#rotate-z');
-	// 		const pSlider = rotator.querySelector('#perspective');
-	//
-	// 		this.shadowRoot.appendChild(rotator);
-	//
-	// 		const [obj] = Array.from(this.shadowRoot.querySelector('slot[name="obj-3d"]').assignedElements());
-	//
-	// 		obj.style.transformStyle = 'preserve-3d';
-	//
-	// 		// these coincide with the starting values
-	// 		let xVal = xSlider.value;
-	// 		let yVal = ySlider.value;
-	// 		let zVal = zSlider.value;
-	// 		let pVal = pSlider.value;
-	//
-	// 		const updateTransform = function () {
-	// 			obj.style.transform = `rotateX(${xVal}deg) rotateY(${yVal}deg) rotateZ(${zVal}deg)`;
-	// 		};
-	//
-	// 		const updatePerspective = () => {
-	// 			obj.style.perspective = `${pVal}px`;
-	// 		};
-	// 		xSlider.addEventListener('input', () => {
-	// 			xVal = xSlider.value;
-	// 			updateTransform();
-	// 		});
-	// 		ySlider.addEventListener('input', () => {
-	// 			yVal = ySlider.value;
-	// 			updateTransform();
-	// 		});
-	// 		zSlider.addEventListener('input', () => {
-	// 			zVal = zSlider.value;
-	// 			updateTransform();
-	// 		});
-	// 		pSlider.addEventListener('input', () => {
-	// 			pVal = pSlider.value;
-	// 			updatePerspective();
-	// 		});
-	// 	} catch (err) {
-	// 		console.error('cannot retrieve rotate template:', err);
-	// 		return;
-	// 	}
-	// }
 }
 
 customElements.define('rotate-3d', Rotate3D);

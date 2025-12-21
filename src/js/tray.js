@@ -11,7 +11,9 @@ const text = `
     .tray > * {
       position: absolute;
     }
+
     .tray-face-container {
+      transform-style: preserve-3d;
       width: var(--tray-size);
       height: var(--tray-size);
       padding: var(--tray-depth);
@@ -23,10 +25,11 @@ const text = `
       &.front {
         transform: translateZ(var(--tray-depth));
       }
+      background-color: #2222aa;
     }
 
     .tray-face.front {
-      background-color: #2222aa;
+      background-color: transparent;
     }
 
     .tray-rim-edge {
@@ -67,6 +70,9 @@ const text = `
         transform: translateZ(var(--tray-depth));
       }
     }
+    slot {
+      transform-style: preserve-3d;
+    }
   </style>
   <div class="tray">
     <div class="tray-face-container back">
@@ -74,7 +80,6 @@ const text = `
     </div>
     <div class="tray-face-container front">
       <div class="tray-face front"></div>
-      <slot name="grid"></slot>
     </div>
     <div class="tray-rim left">
       <div class="tray-rim-edge left"></div>
@@ -100,10 +105,10 @@ const text = `
 </template>
 `;
 
-class BoardTray extends HTMLElement {
+export default class BoardTray extends HTMLElement {
 	constructor() {
 		super();
-		const shadowRoot = this.attachShadow({ mode: 'open' });
+		// const shadowRoot = this.attachShadow({ mode: 'open' });
 
 		const tempContainer = document.createElement('div');
 		tempContainer.innerHTML = text;
@@ -111,7 +116,8 @@ class BoardTray extends HTMLElement {
 		const template = tempContainer.querySelector('#board-tray-template');
 		const templateContent = template.content;
 
-		shadowRoot.appendChild(templateContent.cloneNode(true));
+		// shadowRoot.appendChild(templateContent.cloneNode(true));
+		this.appendChild(templateContent.cloneNode(true));
 	}
 }
 

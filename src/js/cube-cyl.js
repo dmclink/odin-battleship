@@ -31,14 +31,15 @@ const text = `
   </style>
   <div class="cube-cyl__container">
     <cube-3d class="cube-cyl__transparent"></cube-3d>
-    <cylinder-3d class="cube-cyl__hole" sides="30"></cylinder-3d>
+    <cylinder-3d class="cube-cyl__hole" sides="10"></cylinder-3d>
   </div>
 </template>
 `;
 
-class CubeCyl3D extends HTMLElement {
+export default class CubeCyl3D extends HTMLElement {
 	#cube;
 	#color;
+	#cyl;
 
 	constructor() {
 		super();
@@ -61,6 +62,8 @@ class CubeCyl3D extends HTMLElement {
 		cube.setAttribute('--bgc', 'transparent');
 		const cyl = container.querySelector('cylinder-3d');
 
+		this.#cyl = cyl;
+
 		// append it before checking sizes
 		shadowRoot.appendChild(cubeCyl);
 
@@ -77,7 +80,7 @@ class CubeCyl3D extends HTMLElement {
 		cyl.setAttribute('inner-thickness', `${holePercent}`);
 		cyl.setAttribute('shadow-inner', '0.6');
 
-		cyl.rebuild(cylWidth, this.offsetHeight);
+		// cyl.rebuild(cylWidth, this.offsetHeight);
 
 		// this.addEventListener('mouseenter', (e) => {
 		// 	e.stopPropagation();

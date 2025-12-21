@@ -55,7 +55,7 @@ export class Cylinder3D extends HTMLElement {
 		const color = `var(--bgc, ${this.getAttribute('color') || 'black'})`;
 		this.#color = color;
 
-		const sides = this.getAttribute('sides') || 50;
+		const sides = this.getAttribute('sides') || 8;
 		this.#sides = sides;
 
 		shadowRoot.appendChild(cylinder);

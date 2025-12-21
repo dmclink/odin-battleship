@@ -225,6 +225,21 @@ cylinder-3d {
 	width: 300px;
 }
 
+ship-grid {
+	--depth: var(--tray-depth);
+	height: 100%;
+	width: 100%;
+}
+
+ship-board {
+	--depth: var(--tray-depth);
+	transform-style: preserve-3d;
+}
+hit-board {
+	--depth: var(--tray-depth);
+	transform-style: preserve-3d;
+}
+
 hinge-3d {
 	--bgc: #4468ea;
 	--hinge-height: calc(var(--tray-size) * 0.3);

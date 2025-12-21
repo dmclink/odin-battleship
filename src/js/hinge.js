@@ -76,7 +76,6 @@ export class Hinge3D extends HTMLElement {
 			container.appendChild(newCyl);
 		}
 
-		console.log('hinge:', hinge);
 		shadowRoot.appendChild(hinge);
 	}
 
