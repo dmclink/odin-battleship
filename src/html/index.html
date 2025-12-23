@@ -13,9 +13,7 @@
     <script type="module" src="../js/cube.js" defer></script>
     <script type="module" src="../js/ship-board.js" defer></script>
     <script type="module" src="../js/hit-board.js" defer></script>
-    <script type="module" src="../js/carrier-comp.js" defer></script>
-    <script type="module" src="../js/battleship-comp.js" defer></script>
-    <script type="module" src="../js/submarine-comp.js" defer></script>
+    <script type="module" src="../js/ship-builder.js" defer></script>
   </head>
   <body class="body">
     <!-- FIX: remove class hidden  -->
@@ -59,9 +57,11 @@
             <!-- <hinge-3d class="hinge-right" slot="obj-3d" num-cylinders="3" gap-size="10px"></hinge-3d> -->
             <!-- <ship-board class="ship-board"></ship-board> -->
             <!-- <hit-board class="hit-board"></hit-board> -->
-            <ship-carrier></ship-carrier>
-            <ship-battleship></ship-battleship>
-            <ship-submarine></ship-submarine>
+            <div class="ships">
+              <ship-carrier></ship-carrier>
+              <ship-battleship></ship-battleship>
+              <ship-submarine></ship-submarine>
+            </div>
             <!-- <board-tray class="ship-board"> -->
             <!-- <ship-grid slot="grid"></ship-grid> -->
             <!-- </board-tray> -->

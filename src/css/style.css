@@ -231,6 +231,14 @@ ship-grid {
 	width: 100%;
 }
 
+.ships {
+	display: grid;
+	transform-style: preserve-3d;
+	grid-template-rows: repeat(5, 1fr);
+	height: 50%;
+	width: 50%;
+}
+
 ship-board {
 	--depth: var(--tray-depth);
 	transform-style: preserve-3d;

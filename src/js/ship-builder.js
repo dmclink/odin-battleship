@@ -122,7 +122,7 @@ function buildShip(
 ) {
 	const result = document.createElement('div');
 	result.style.transformStyle = 'preserve-3d';
-	result.style.position = 'absolute';
+	// result.style.position = 'absolute';
 	result.style.display = 'grid';
 	result.style.placeItems = 'center';
 
@@ -153,4 +153,32 @@ function buildShip(
 	return result;
 }
 
-export { buildShip };
+class Submarine extends HTMLElement {
+	constructor() {
+		super();
+		this.appendChild(buildShip(60, 60, 10, 3, 'gray', 'black', true, true, 'round', 'round'));
+		this.style.transformStyle = 'preserve-3d';
+	}
+}
+
+class Carrier extends HTMLElement {
+	constructor() {
+		super();
+		this.style.transformStyle = 'preserve-3d';
+		this.appendChild(buildShip(60, 60, 10, 5, 'gray', 'black'));
+	}
+}
+
+class Battleship extends HTMLElement {
+	constructor() {
+		super();
+
+		this.style.transformStyle = 'preserve-3d';
+		// this.style.position = 'absolute';
+		this.appendChild(buildShip(60, 60, 10, 4, 'gray', 'black', true, true));
+	}
+}
+
+customElements.define('ship-submarine', Submarine);
+customElements.define('ship-carrier', Carrier);
+customElements.define('ship-battleship', Battleship);
