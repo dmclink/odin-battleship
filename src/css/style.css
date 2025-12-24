@@ -173,6 +173,8 @@ summary {
 	--tray-depth: 3rem;
 	--tray-size: calc(var(--size) - var(--hinge-size));
 	perspective: 900px;
+	display: grid;
+	place-items: center;
 }
 
 .cube-wall {
@@ -202,29 +204,6 @@ summary {
 	}
 }
 
-cube-3d {
-	--bgc: #44c9ea33;
-	height: 10rem;
-	width: 10rem;
-}
-
-cube-holed-3d {
-	--bgc: #44c9eaaa;
-	height: 10rem;
-	width: 10rem;
-}
-
-cube-cyl-3d {
-	--bgc: #44c9eaaa;
-	height: 5rem;
-	width: 10rem;
-}
-
-cylinder-3d {
-	height: 100px;
-	width: 300px;
-}
-
 ship-grid {
 	--depth: var(--tray-depth);
 	height: 100%;
@@ -244,28 +223,21 @@ ship-board {
 	--depth: var(--tray-depth);
 	transform-style: preserve-3d;
 }
+
 hit-board {
 	--depth: var(--tray-depth);
 	transform-style: preserve-3d;
 }
+.board {
+	display: grid;
+	place-items: center;
+}
 
-hinge-3d {
-	--bgc: #4468ea;
-	--hinge-height: calc(var(--tray-size) * 0.3);
-	height: var(--hinge-height);
-	width: var(--hinge-size);
-
-	position: absolute;
-	&.hinge-left {
-		transform: rotateX(90deg) rotateZ(90deg) translateX(calc(-1 * var(--mid) + var(--hinge-size) / 2))
-			translateZ(calc(-1 * var(--mid) + var(--hinge-size) / 2))
-			translateY(calc(var(--tray-size) / 2 - var(--hinge-height) / 2));
-	}
-	&.hinge-right {
-		transform: rotateX(90deg) rotateZ(90deg) translateX(calc(-1 * var(--mid) + var(--hinge-size) / 2))
-			translateZ(calc(-1 * var(--mid) + var(--hinge-size) / 2))
-			translateY(calc(-1 * var(--tray-size) / 2 + var(--hinge-height) / 2));
-	}
+game-board {
+	display: grid;
+	place-items: center;
+	perspective: 1000px;
+	--color-primary: #4468ea;
 }
 
 .board {
