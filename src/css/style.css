@@ -235,6 +235,7 @@ ship-grid {
 	display: grid;
 	transform-style: preserve-3d;
 	grid-template-rows: repeat(5, 1fr);
+	place-items: start;
 	height: 50%;
 	width: 50%;
 }
