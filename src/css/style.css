@@ -177,7 +177,8 @@ summary {
 }
 
 .cube-wall {
-	background-color: rgba(100, 100, 0, 0.2);
+	/* background-color: rgba(100, 100, 0, 0.2); */
+	visibility: hidden;
 	position: absolute;
 	height: 100%;
 	width: 100%;

@@ -19,6 +19,14 @@ export default class BoardTray extends HTMLElement {
 			.main-container {
 				transform-style: preserve-3d;
 			}
+			.board-grid {
+				transform-style: preserve-3d;
+				display: grid;
+				place-items: center;
+				position: absolute;
+				height: 100%;
+				width: 100%;
+			}
 			.tray-face.front {
 				transform-style: preserve-3d;
 				display: grid;
@@ -34,6 +42,7 @@ export default class BoardTray extends HTMLElement {
 		  <div class="middle-row">
 		    <div class="tray-rim left"></div>
 		    <div class="main-container">
+			  <div class="board-grid"></div>
 		      <div class="tray-face front">
 			    <div class="tray-face back"></div>
 			  </div>
@@ -61,6 +70,11 @@ export default class BoardTray extends HTMLElement {
 
 		trayFaceFront.style.gridTemplateColumns = `repeat(${rowLength}, ${blockSize}px)`;
 		trayFaceFront.style.gridTemplateRows = `repeat(${rowLength}, ${blockSize}px)`;
+
+		const boardGrid = this.querySelector('.board-grid');
+
+		boardGrid.style.gridTemplateColumns = `repeat(${rowLength}, ${blockSize}px)`;
+		boardGrid.style.gridTemplateRows = `repeat(${rowLength}, ${blockSize}px)`;
 
 		const trayFaceBack = this.querySelector('.tray-face.back');
 		trayFaceBack.style.transform = `translateZ(${-blockSize / 2}px)`;

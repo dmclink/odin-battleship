@@ -83,15 +83,18 @@ function buildWall(blockSize, depth, numHoles, color, leftBevel = false, rightBe
 
 	mainWall.style.width = `${wallWidth}px`;
 	mainWall.style.height = `${depth}px`;
+	mainWall.classList.add('wall-piece');
 	mainWall.style.backgroundColor = color;
 	mainWall.style.transformStyle = 'preserve-3d';
 	mainWall.style.borderInline = '1px solid black';
 
 	if (leftWall) {
+		leftWall.classList.add('wall-piece');
 		result.appendChild(leftWall);
 	}
 	result.appendChild(mainWall);
 	if (rightWall) {
+		rightWall.classList.add('wall-piece');
 		result.appendChild(rightWall);
 	}
 
@@ -116,17 +119,14 @@ function buildTop(
 	result.style.height = `${blockSize}px`;
 	result.style.display = 'grid';
 	result.style.gridTemplateColumns = `repeat(${numHoles}, 1fr)`;
+	result.style.transformStyle = 'preserve-3d';
 	const holeRadiusPx = `${holeSize / 2}px`;
 	for (let i = 0; i < numHoles; i++) {
 		const newHole = document.createElement('div');
-		console.log(`radial-gradient(circle at center, ${holeColor} ${holeRadiusPx}, ${color} ${holeRadiusPx})`);
 		newHole.style.background = `radial-gradient(circle at center, ${holeColor} ${holeRadiusPx}, ${color} ${holeRadiusPx})`;
+		newHole.style.transformStyle = 'preserve-3d';
 		result.appendChild(newHole);
 	}
-
-	const offset = blockSize * 1.414 - blockSize;
-	console.log('offset:', blockSize * 1.414 - blockSize);
-	console.log('offset halved:', offset / 2);
 
 	let leftRadius = '0';
 	if (leftBevel) {
@@ -143,9 +143,7 @@ function buildTop(
 	}
 
 	result.style.borderRadius = `${leftRadius} ${rightRadius} ${rightRadius} ${leftRadius}`;
-
-	// TODO: consider adding padding or margin to sides that don't have bevels to make them the same length
-	// on the top wall
+	result.classList.add('wall-piece');
 
 	result.style.border = '1px solid black';
 	return result;
@@ -164,6 +162,13 @@ function buildShip(
 	rightShape = 'bevel',
 ) {
 	const result = document.createElement('div');
+	const style = document.createElement('style');
+	style.innerHTML = `
+      .wall-piece {
+	    opacity: var(--opacity, 1)
+	  }
+    `;
+	result.appendChild(style);
 	result.style.transformStyle = 'preserve-3d';
 	result.classList.add('ship');
 	result.style.width = `${blockSize * numHoles}px`;
@@ -196,43 +201,79 @@ function buildShip(
 	return result;
 }
 
-class Submarine extends HTMLElement {
+class Ship extends HTMLElement {
+	#locked;
 	constructor() {
 		super();
-		this.appendChild(buildShip(60, 60, 10, 3, 'gray', 'black', true, true, 'round', 'round'));
+		this.#locked = false;
 		this.style.transformStyle = 'preserve-3d';
+		this.style.placeSelf = 'start';
+		this.style.cursor = 'pointer';
+
+		this.addEventListener('drag', (ev) => {
+			if (this.#locked) {
+				return;
+			}
+			this.style.setProperty('--opacity', '0.3');
+		});
+
+		this.addEventListener('dragend', (ev) => {
+			if (this.#locked) {
+				return;
+			}
+			this.style.setProperty('--opacity', '1');
+		});
+	}
+
+	lock() {
+		this.#locked = true;
+		this.style.cursor = 'default';
 	}
 }
 
-class Carrier extends HTMLElement {
-	constructor() {
+class Submarine extends Ship {
+	constructor(blockSize, holeSize) {
 		super();
-		this.style.transformStyle = 'preserve-3d';
-		this.appendChild(buildShip(60, 60, 10, 5, 'gray', 'black'));
+		this.innerHTML = buildShip(
+			blockSize,
+			blockSize,
+			holeSize,
+			3,
+			'gray',
+			'black',
+			true,
+			true,
+			'round',
+			'round',
+		).innerHTML;
 	}
 }
 
-class Battleship extends HTMLElement {
-	constructor() {
+class Carrier extends Ship {
+	constructor(blockSize, holeSize) {
 		super();
-		this.style.transformStyle = 'preserve-3d';
-		this.appendChild(buildShip(60, 60, 10, 4, 'gray', 'black', true, true));
+		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 5, 'gray', 'black').innerHTML;
 	}
 }
 
-class Cruiser extends HTMLElement {
-	constructor() {
+class Battleship extends Ship {
+	constructor(blockSize, holeSize) {
 		super();
-		this.style.transformStyle = 'preserve-3d';
-		this.appendChild(buildShip(60, 60, 10, 4, 'gray', 'black', false, true));
+		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 4, 'gray', 'black', true, true).innerHTML;
 	}
 }
 
-class Destroyer extends HTMLElement {
-	constructor() {
+class Cruiser extends Ship {
+	constructor(blockSize, holeSize) {
 		super();
-		this.style.transformStyle = 'preserve-3d';
-		this.appendChild(buildShip(60, 60, 10, 2, 'gray', 'black', true, false));
+		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 4, 'gray', 'black', false, true).innerHTML;
+	}
+}
+
+class Destroyer extends Ship {
+	constructor(blockSize, holeSize) {
+		super();
+		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 2, 'gray', 'black', true, false).innerHTML;
 	}
 }
 
@@ -241,3 +282,5 @@ customElements.define('ship-carrier', Carrier);
 customElements.define('ship-battleship', Battleship);
 customElements.define('ship-cruiser', Cruiser);
 customElements.define('ship-destroyer', Destroyer);
+
+export { Destroyer, Submarine, Carrier, Battleship, Cruiser };
