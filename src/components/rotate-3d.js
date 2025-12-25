@@ -3,7 +3,6 @@ const text = `
   <style>
     :host {
       transform-style: preserve-3d;
-      perspective: 500px;
       position: relative;
     }
     .controls {

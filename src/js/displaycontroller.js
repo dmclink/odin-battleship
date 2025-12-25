@@ -4,7 +4,6 @@ import { em } from './eventemitter.js';
 class DisplayController {
 	constructor() {
 		this.welcomeScreen = document.querySelector('#welcome-screen');
-		console.log(this.welcomeScreen);
 		this.main = document.querySelector('#main');
 		this.playerModeBtns = Array.from(document.querySelectorAll('.welcome-player-mode'));
 	}

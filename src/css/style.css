@@ -172,7 +172,6 @@ summary {
 	--mid: calc(var(--size) / 2);
 	--tray-depth: 3rem;
 	--tray-size: calc(var(--size) - var(--hinge-size));
-	perspective: 900px;
 	display: grid;
 	place-items: center;
 }
@@ -236,8 +235,8 @@ hit-board {
 game-board {
 	display: grid;
 	place-items: center;
-	perspective: 1000px;
 	--color-primary: #4468ea;
+	--color-secondary: #203a99;
 }
 
 .board {
@@ -255,34 +254,6 @@ game-board {
 	margin: 0 auto;
 	display: grid;
 	place-items: center;
-}
-
-board-tray {
-	height: var(--tray-size);
-	width: var(--tray-size);
-	transform-style: preserve-3d;
-}
-
-.ship-board,
-.hit-board {
-	position: absolute;
-	margin: 0 auto;
-	width: var(--tray-size);
-	height: var(--tray-size);
-}
-
-/* back of cube */
-.hit-board {
-	background-color: rgba(244, 0, 0, 0.5);
-	transform: translateZ(calc(-1 * var(--mid))) translateY(calc(-1 * var(--hinge-size) / 2));
-}
-/* bottom of cube */
-.ship-board {
-	margin: 0 auto;
-	background-color: rgba(0, 244, 0, 0.5);
-	transform-origin: 50% 100%;
-	transform: translateY(calc(var(--hinge-size) / 2)) rotateX(90deg)
-		translateY(calc(var(--tray-size) / 2 + var(--hinge-size) / 2));
 }
 
 .hidden {

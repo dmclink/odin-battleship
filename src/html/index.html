@@ -6,14 +6,15 @@
     <title>Document</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script type="module" src="../js/index.js"></script>
-    <script type="module" src="../js/tray.js" defer></script>
-    <script type="module" src="../js/rotate-3d.js" defer></script>
-    <!-- <script type="module" src="../js/cylinder.js" defer></script> -->
-    <script type="module" src="../js/hinge.js" defer></script>
-    <script type="module" src="../js/cube.js" defer></script>
-    <script type="module" src="../js/ship-board.js" defer></script>
-    <script type="module" src="../js/hit-board.js" defer></script>
-    <script type="module" src="../js/ship-builder.js" defer></script>
+    <!-- <script type="module" src="../components/tray.js" defer></script> -->
+    <script type="module" src="../components/rotate-3d.js" defer></script>
+    <script type="module" src="../components/gameboard-element.js" defer></script>
+    <!-- <script type="module" src="../components/cylinder.js" defer></script> -->
+    <!-- <script type="module" src="../components/hinge.js" defer></script> -->
+    <!-- <script type="module" src="../components/cube.js" defer></script> -->
+    <!-- <script type="module" src="../components/ship-board.js" defer></script> -->
+    <!-- <script type="module" src="../components/hit-board.js" defer></script> -->
+    <!-- <script type="module" src="../components/ship-builder.js" defer></script> -->
   </head>
   <body class="body">
     <!-- FIX: remove class hidden  -->
@@ -53,17 +54,18 @@
             <div class="cube-wall left">left</div>
             <div class="cube-wall right">right</div>
 
+            <game-board block-size="40" , hole-size="10"></game-board>
             <!-- <hinge-3d class="hinge-left" slot="obj-3d" num-cylinders="3" gap-size="10px"></hinge-3d> -->
             <!-- <hinge-3d class="hinge-right" slot="obj-3d" num-cylinders="3" gap-size="10px"></hinge-3d> -->
             <!-- <ship-board class="ship-board"></ship-board> -->
             <!-- <hit-board class="hit-board"></hit-board> -->
-            <div class="ships">
-              <ship-carrier></ship-carrier>
-              <ship-battleship></ship-battleship>
-              <ship-submarine></ship-submarine>
-              <ship-destroyer></ship-destroyer>
-              <ship-cruiser></ship-cruiser>
-            </div>
+            <!-- <div class="ships"> -->
+            <!--   <ship-carrier></ship-carrier> -->
+            <!--   <ship-battleship></ship-battleship> -->
+            <!--   <ship-submarine></ship-submarine> -->
+            <!--   <ship-destroyer></ship-destroyer> -->
+            <!--   <ship-cruiser></ship-cruiser> -->
+            <!-- </div> -->
             <!-- <board-tray class="ship-board"> -->
             <!-- <ship-grid slot="grid"></ship-grid> -->
             <!-- </board-tray> -->

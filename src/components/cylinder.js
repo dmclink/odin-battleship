@@ -17,7 +17,6 @@ const text = `
       display: flex;
       justify-content: center;
       transform-style: preserve-3d;
-      /* perspective: 1000px; */
     }
 
     .cylinder__container * {
@@ -77,6 +76,11 @@ export default class Cylinder3D extends HTMLElement {
 		const sideLength = calculateSideLength(this.#sides, radius) + 1;
 		const degreeStep = 360 / this.#sides;
 
+		let border = 'none';
+		if (applyBorder || this.hasAttribute('border')) {
+			border = applyBorder || this.getAttribute('border') || '1px solid black';
+		}
+
 		for (let i = 0, degree = 0; i < this.#sides; i++, degree += degreeStep) {
 			const side = document.createElement('div');
 			side.classList.add('cylinder__side');
@@ -85,12 +89,8 @@ export default class Cylinder3D extends HTMLElement {
 			side.style.position = 'absolute';
 			side.style.backgroundColor = this.#color;
 			side.style.transform = `rotateY(${degree}deg) translateZ(${radius}px)`;
+			side.style.borderRight = border;
 			this.#container.appendChild(side);
-		}
-
-		let border = 'none';
-		if (applyBorder || this.hasAttribute('border')) {
-			border = applyBorder || this.getAttribute('border') || '1px solid black';
 		}
 
 		// inner ring always has a cap
