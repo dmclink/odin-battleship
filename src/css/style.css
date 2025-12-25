@@ -203,12 +203,6 @@ summary {
 	}
 }
 
-ship-grid {
-	--depth: var(--tray-depth);
-	height: 100%;
-	width: 100%;
-}
-
 .ships {
 	display: grid;
 	transform-style: preserve-3d;
@@ -218,15 +212,6 @@ ship-grid {
 	width: 50%;
 }
 
-ship-board {
-	--depth: var(--tray-depth);
-	transform-style: preserve-3d;
-}
-
-hit-board {
-	--depth: var(--tray-depth);
-	transform-style: preserve-3d;
-}
 .board {
 	display: grid;
 	place-items: center;

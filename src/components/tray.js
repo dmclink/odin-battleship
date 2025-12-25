@@ -22,8 +22,6 @@ export default class BoardTray extends HTMLElement {
 			.tray-face.front {
 				transform-style: preserve-3d;
 				display: grid;
-				grid-template-columns: repeat(${rowLength}, ${blockSize}px);
-				grid-template-rows: repeat(${rowLength}, ${blockSize}px);
 				place-items: center;
 			}
 			.tray-face.back {
@@ -58,6 +56,11 @@ export default class BoardTray extends HTMLElement {
 
 		const bottom = this.querySelector('.tray-rim.bottom');
 		bottom.replaceWith(cube(blockSize, blockSize * (rowLength + 2), blockSize, colorPrimary, '1px solid black'));
+
+		const trayFaceFront = this.querySelector('.tray-face.front');
+
+		trayFaceFront.style.gridTemplateColumns = `repeat(${rowLength}, ${blockSize}px)`;
+		trayFaceFront.style.gridTemplateRows = `repeat(${rowLength}, ${blockSize}px)`;
 
 		const trayFaceBack = this.querySelector('.tray-face.back');
 		trayFaceBack.style.transform = `translateZ(${-blockSize / 2}px)`;
