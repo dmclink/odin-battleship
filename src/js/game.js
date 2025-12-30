@@ -116,9 +116,24 @@ class Game {
 		this.#phase = Phases.ATTACK;
 	}
 
+	tryPlaceShip(shipName, start, end) {
+		const currentPlayerBoard = this.currentPlayerBoard();
+		const ship = currentPlayerBoard.ships().get(shipName);
+
+		if (!ship) {
+			throw new Error('invalid ship name, does not exist in map');
+		}
+
+		if (currentPlayerBoard.canPlaceShip(ship, start, end)) {
+			currentPlayerBoard.placeShip(ship, start, end);
+			em.emit(Events.PLACED_SHIP, shipName, start, end);
+		}
+	}
+
 	bindEvents() {
 		em.on(Events.SELECT_GAME_TYPE, this.setGameType.bind(this));
 		em.on(Events.GAME_OVER, this.unsetGameType.bind(this));
+		em.on(Events.TRY_PLACE_SHIP, this.tryPlaceShip.bind(this));
 	}
 }
 

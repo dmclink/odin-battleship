@@ -11,7 +11,6 @@ export default class BoardTray extends HTMLElement {
             .tray {
               position: absolute;
               transform-style: preserve-3d;
-            }
 			.middle-row {
 				transform-style: preserve-3d;
 				display: flex;
@@ -36,6 +35,19 @@ export default class BoardTray extends HTMLElement {
 				height: 100%;
 				width: 100%;
 				position: absolute;
+			}
+			.ship-cell.drop-zone {
+				background-color: #44a7bd9e;
+				border-bottom: 1px solid black;
+				&::before {
+					content: "";
+					height: 100%;
+					width: 100%;
+					position: absolute;
+					transform-style: preserve-3d;
+					transform: rotateX(90deg) translateZ(${blockSize / -2}px) translateY(${blockSize / -2}px);
+				    background-color: #44a7bd9e;
+				}
 			}
           </style>
 		  <div class="tray-rim top"></div>
@@ -75,6 +87,7 @@ export default class BoardTray extends HTMLElement {
 
 		boardGrid.style.gridTemplateColumns = `repeat(${rowLength}, ${blockSize}px)`;
 		boardGrid.style.gridTemplateRows = `repeat(${rowLength}, ${blockSize}px)`;
+		boardGrid.style.transform = `translateZ(${blockSize / 2}px)`;
 
 		const trayFaceBack = this.querySelector('.tray-face.back');
 		trayFaceBack.style.transform = `translateZ(${-blockSize / 2}px)`;

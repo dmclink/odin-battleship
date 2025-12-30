@@ -1,21 +1,7 @@
 import { Ship } from './ship.js';
 import { Events } from './events.js';
 import { em } from './eventemitter.js';
-
-class Loc {
-	constructor(x, y) {
-		this.x = x;
-		this.y = y;
-	}
-
-	equal(loc2) {
-		return this.x === loc2.x && this.y === loc2.y;
-	}
-
-	moveLoc(dX, dY) {
-		return new Loc(this.x + dX, this.y + dY);
-	}
-}
+import { Loc } from './loc.js';
 
 class GameBoard {
 	#height;
@@ -112,7 +98,6 @@ class GameBoard {
 		const ship = this.#board[y][x];
 		const shipName = ship.name();
 		ship.hit();
-		// TODO: count sunk ships and emit game over instead of received attack?
 
 		if (this.allShipsSunk()) {
 			em.emit(Events.GAME_OVER, x, y);
@@ -144,6 +129,27 @@ class GameBoard {
 		em.emit(Events.ATTACK, x, y);
 	}
 
+	canPlaceShip(ship, start, end) {
+		return (
+			ship &&
+			!this.isLocked() &&
+			!ship.isPlaced() &&
+			!this.#isOOB(start) &&
+			!this.#isOOB(end) &&
+			this.isEmptyBetween(start, end) &&
+			GameBoard.isCorrectShipLength(ship, start, end)
+		);
+	}
+
+	static isCorrectShipLength(ship, start, end) {
+		const implicitShipLength = (Math.abs(start.x - end.x) || Math.abs(start.y - end.y)) + 1;
+		const actualShipLength = ship.length();
+		if (implicitShipLength !== actualShipLength) {
+			return false;
+		}
+		return true;
+	}
+
 	placeShip(ship, start, end) {
 		if (!ship) {
 			throw new Error('is not a valid ship');
@@ -161,40 +167,19 @@ class GameBoard {
 			throw new Error('start or end point is out of bounds of board');
 		}
 
-		const implicitShipLength = (Math.abs(start.x - end.x) || Math.abs(start.y - end.y)) + 1;
-		const actualShipLength = ship.length();
-		if (implicitShipLength !== actualShipLength) {
-			throw new Error(
-				`implied ship length does not match actual. got ${implicitShipLength} want ${actualShipLength}`,
-			);
+		if (!GameBoard.isCorrectShipLength(ship, start, end)) {
+			throw new Error(`implied ship length does not match actual`);
 		}
 
-		const cmp = function (a, b) {
-			if (a === b) {
-				return 0;
-			} else if (a > b) {
-				return 1;
-			}
-			return -1;
-		};
-		const dX = cmp(end.x, start.x);
-		const dY = cmp(end.y, start.y);
-
-		// check for collisions along ship path first before placing
-		let curs = start;
-		if (this.#board[curs.y][curs.x] !== undefined) {
+		if (!this.isEmptyBetween(start, end)) {
 			throw new Error('ships colliding at place ship path');
 		}
 
-		while (!curs.equal(end)) {
-			curs = curs.moveLoc(dX, dY);
-			if (this.#board[curs.y][curs.x] !== undefined) {
-				throw new Error('ships colliding at place ship path');
-			}
-		}
-
 		// place the ship
-		curs = start;
+		const dX = GameBoard.cmp(end.x, start.x);
+		const dY = GameBoard.cmp(end.y, start.y);
+		let curs = start;
+
 		this.#board[curs.y][curs.x] = ship;
 		while (!curs.equal(end)) {
 			curs = curs.moveLoc(dX, dY);
@@ -204,6 +189,34 @@ class GameBoard {
 
 		// TODO: emit all ships placed?
 		// if (ships.placed == this.ships().length)
+	}
+
+	static cmp(a, b) {
+		if (a === b) {
+			return 0;
+		} else if (a > b) {
+			return 1;
+		}
+		return -1;
+	}
+
+	isEmptyBetween(start, end) {
+		const dX = GameBoard.cmp(end.x, start.x);
+		const dY = GameBoard.cmp(end.y, start.y);
+
+		let curs = start;
+		if (this.#board[curs.y][curs.x] !== undefined) {
+			return false;
+		}
+
+		while (!curs.equal(end)) {
+			curs = curs.moveLoc(dX, dY);
+			if (this.#board[curs.y][curs.x] !== undefined) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	allShipsSunk() {

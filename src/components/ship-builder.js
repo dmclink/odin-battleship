@@ -1,15 +1,4 @@
-const style = document.createElement('style');
-style.textContent = `
-.ship {
-  box-sizing: border-box;
-  display: grid;
-  place-items: center;
-  & * {
-    box-sizing: inherit;
-  }
-}
-`;
-document.head.appendChild(style);
+import { Loc } from '../js/loc.js';
 
 function buildWall(blockSize, depth, numHoles, color, leftBevel = false, rightBevel = false) {
 	const result = document.createElement('div');
@@ -46,7 +35,7 @@ function buildWall(blockSize, depth, numHoles, color, leftBevel = false, rightBe
 		leftWall.style.transformStyle = 'preserve-3d';
 
 		paintedWall.style.width = `${leftWallWidth}px`;
-		paintedWall.style.height = '100%';
+		paintedWall.style.height = `${blockSize}px`;
 		paintedWall.style.position = 'absolute';
 		paintedWall.style.right = '0';
 		paintedWall.style.top = '0';
@@ -73,7 +62,7 @@ function buildWall(blockSize, depth, numHoles, color, leftBevel = false, rightBe
 		rightWall.style.transformStyle = 'preserve-3d';
 
 		paintedWall.style.width = `${rightWallWidth}px`;
-		paintedWall.style.height = '100%';
+		paintedWall.style.height = `${blockSize}px`;
 		paintedWall.style.position = 'absolute';
 		paintedWall.style.left = '0';
 		paintedWall.style.top = '0';
@@ -164,7 +153,18 @@ function buildShip(
 	const result = document.createElement('div');
 	const style = document.createElement('style');
 	style.innerHTML = `
-      .wall-piece {
+      .ship {
+        box-sizing: border-box;
+        display: grid;
+        place-items: center;
+        & * {
+          box-sizing: inherit;
+        }
+      }
+      .wall {
+        pointer-events: none;
+      }
+	  .wall-piece {
 	    opacity: var(--opacity, 1)
 	  }
     `;
@@ -203,37 +203,93 @@ function buildShip(
 
 class Ship extends HTMLElement {
 	#locked;
-	constructor() {
+	#shipGrid;
+	#shipSize;
+	#rotation;
+	#r1;
+	#r2;
+	#c1;
+	#c2;
+
+	constructor(shipGrid, shipSize, blockSize) {
 		super();
 		this.#locked = false;
 		this.style.transformStyle = 'preserve-3d';
 		this.style.placeSelf = 'start';
 		this.style.cursor = 'pointer';
+		this.#shipSize = shipSize;
+		// this.style.transformOrigin = `${(shipSize * blockSize) / 2}px ${blockSize / 2}px`;
+		this.style.transformOrigin = `${blockSize / 2}px ${blockSize / 2}px`;
+		this.#rotation = 0;
 
-		this.addEventListener('drag', (ev) => {
-			if (this.#locked) {
-				return;
-			}
-			this.style.setProperty('--opacity', '0.3');
-		});
+		this.setAttribute('tabindex', '0');
+		// this.setAttribute('draggable', 'true');
+		this.#shipGrid = shipGrid;
+	}
 
-		this.addEventListener('dragend', (ev) => {
-			if (this.#locked) {
-				return;
-			}
-			this.style.setProperty('--opacity', '1');
-		});
+	renderRotation() {
+		this.style.transform = `rotateZ(${this.#rotation}deg)`;
+	}
+
+	rotateCW() {
+		this.#rotation += 90;
+		this.#rotation %= 360;
+		this.renderRotation();
+	}
+
+	rotateCCW() {
+		this.#rotation -= 90;
+		if (this.#rotation < 0) {
+			this.#rotation = 360 + this.#rotation;
+		}
+		this.renderRotation();
+	}
+
+	setRotation(newRotation) {
+		this.#rotation = Math.floor(newRotation / 90) * 90;
+		this.renderRotation();
+	}
+
+	getRotation() {
+		return this.#rotation;
 	}
 
 	lock() {
 		this.#locked = true;
 		this.style.cursor = 'default';
 	}
+	isLocked() {
+		return this.#locked;
+	}
+
+	getSize() {
+		return this.#shipSize;
+	}
+
+	setLocation(start, end) {
+		const r1 = start.x;
+		const r2 = end.x;
+		const c1 = start.y;
+		const c2 = end.y;
+		this.#r1 = r1;
+		this.#r2 = r2;
+		this.#c1 = c1;
+		this.#c2 = c2;
+		this.updateGridArea();
+	}
+
+	getLocation() {
+		return [new Loc(this.#c1, this.#r1), new Loc(this.#c2, this.#r2)];
+	}
+
+	updateGridArea() {
+		this.style.gridArea = `${this.#r1 + 1} / ${this.#c1 + 1} / ${this.#r2 + 2} / ${this.#c2 + 2}`;
+	}
 }
 
 class Submarine extends Ship {
-	constructor(blockSize, holeSize) {
-		super();
+	constructor(blockSize, holeSize, shipGrid) {
+		super(shipGrid, 3, blockSize);
 		this.innerHTML = buildShip(
 			blockSize,
 			blockSize,
@@ -250,29 +306,29 @@ class Submarine extends Ship {
 }
 
 class Carrier extends Ship {
-	constructor(blockSize, holeSize) {
-		super();
+	constructor(blockSize, holeSize, shipGrid) {
+		super(shipGrid, 5, blockSize);
 		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 5, 'gray', 'black').innerHTML;
 	}
 }
 
 class Battleship extends Ship {
-	constructor(blockSize, holeSize) {
-		super();
+	constructor(blockSize, holeSize, shipGrid) {
+		super(shipGrid, 4, blockSize);
 		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 4, 'gray', 'black', true, true).innerHTML;
 	}
 }
 
 class Cruiser extends Ship {
-	constructor(blockSize, holeSize) {
-		super();
-		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 4, 'gray', 'black', false, true).innerHTML;
+	constructor(blockSize, holeSize, shipGrid) {
+		super(shipGrid, 3, blockSize);
+		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 3, 'gray', 'black', false, true).innerHTML;
 	}
 }
 
 class Destroyer extends Ship {
-	constructor(blockSize, holeSize) {
-		super();
+	constructor(blockSize, holeSize, shipGrid) {
+		super(shipGrid, 2, blockSize);
 		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 2, 'gray', 'black', true, false).innerHTML;
 	}
 }

@@ -204,6 +204,13 @@ summary {
 	}
 }
 
+/* FIX: DELETE this */
+main {
+	height: 100vh;
+	display: grid;
+	place-items: center;
+}
+
 .ships {
 	display: grid;
 	transform-style: preserve-3d;
@@ -223,6 +230,7 @@ game-board {
 	place-items: center;
 	--color-primary: #4468ea;
 	--color-secondary: #203a99;
+	transform: rotateX(-80deg) translateZ(800px);
 }
 
 .board {
