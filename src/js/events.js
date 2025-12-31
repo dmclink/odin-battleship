@@ -7,6 +7,8 @@ const Events = Object.freeze({
 	SELECT_GAME_TYPE: 'selectGameType',
 	GAME_START: 'gameStart',
 	TRY_PLACE_SHIP: 'tryPlaceShip',
+	PLACE_SHIP_SUCCESS: 'placeShipSuccess',
+	PLACE_SHIP_FAIL: 'placeShipFail',
 });
 
 export { Events };

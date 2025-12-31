@@ -126,7 +126,9 @@ class Game {
 
 		if (currentPlayerBoard.canPlaceShip(ship, start, end)) {
 			currentPlayerBoard.placeShip(ship, start, end);
-			em.emit(Events.PLACED_SHIP, shipName, start, end);
+			em.emit(Events.PLACE_SHIP_SUCCESS, shipName, start, end);
+		} else {
+			em.emit(Events.PLACE_SHIP_FAIL, shipName, start, end);
 		}
 	}
 

@@ -203,7 +203,6 @@ function buildShip(
 
 class Ship extends HTMLElement {
 	#locked;
-	#shipGrid;
 	#shipSize;
 	#rotation;
 	#r1;
@@ -211,7 +210,7 @@ class Ship extends HTMLElement {
 	#c1;
 	#c2;
 
-	constructor(shipGrid, shipSize, blockSize) {
+	constructor(shipSize, blockSize) {
 		super();
 		this.#locked = false;
 		this.style.transformStyle = 'preserve-3d';
@@ -224,7 +223,6 @@ class Ship extends HTMLElement {
 
 		this.setAttribute('tabindex', '0');
 		// this.setAttribute('draggable', 'true');
-		this.#shipGrid = shipGrid;
 	}
 
 	renderRotation() {
@@ -288,8 +286,8 @@ class Ship extends HTMLElement {
 }
 
 class Submarine extends Ship {
-	constructor(blockSize, holeSize, shipGrid) {
-		super(shipGrid, 3, blockSize);
+	constructor(blockSize, holeSize) {
+		super(3, blockSize);
 		this.innerHTML = buildShip(
 			blockSize,
 			blockSize,
@@ -306,29 +304,29 @@ class Submarine extends Ship {
 }
 
 class Carrier extends Ship {
-	constructor(blockSize, holeSize, shipGrid) {
-		super(shipGrid, 5, blockSize);
+	constructor(blockSize, holeSize) {
+		super(5, blockSize);
 		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 5, 'gray', 'black').innerHTML;
 	}
 }
 
 class Battleship extends Ship {
-	constructor(blockSize, holeSize, shipGrid) {
-		super(shipGrid, 4, blockSize);
+	constructor(blockSize, holeSize) {
+		super(4, blockSize);
 		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 4, 'gray', 'black', true, true).innerHTML;
 	}
 }
 
 class Cruiser extends Ship {
-	constructor(blockSize, holeSize, shipGrid) {
-		super(shipGrid, 3, blockSize);
+	constructor(blockSize, holeSize) {
+		super(3, blockSize);
 		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 3, 'gray', 'black', false, true).innerHTML;
 	}
 }
 
 class Destroyer extends Ship {
-	constructor(blockSize, holeSize, shipGrid) {
-		super(shipGrid, 2, blockSize);
+	constructor(blockSize, holeSize) {
+		super(2, blockSize);
 		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 2, 'gray', 'black', true, false).innerHTML;
 	}
 }

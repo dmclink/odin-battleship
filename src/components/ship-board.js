@@ -9,6 +9,10 @@ export default class ShipBoard extends BoardTray {
 	#ships;
 	#shipClones;
 	#boardGrid;
+	#draggedShip;
+	#ogLoc1;
+	#ogLoc2;
+
 	constructor(blockSize, holeSize, colorPrimary, colorSecondary, gridSize) {
 		super(blockSize, colorPrimary, colorSecondary, gridSize);
 
@@ -95,7 +99,7 @@ export default class ShipBoard extends BoardTray {
 		shipClone.set(cruiser, cruiserClone);
 		shipClone.set(destroyer, destroyerClone);
 
-		em.on(Events.PLACED_SHIP, this.updateShipLocation.bind(this));
+		em.on(Events.PLACE_SHIP_SUCCESS, this.updateShipLocation.bind(this));
 
 		// pick arbitrary starting location on board for ships
 		em.on(Events.GAME_START, () => {
@@ -144,7 +148,6 @@ export default class ShipBoard extends BoardTray {
 		// these are "global" mutated variables to track state and which ship is being dragged by user
 		let isDragging = false;
 		let draggedClone;
-		let draggedShip;
 		let draggedIdx;
 
 		const handleRKeyPress = function (ship) {
@@ -185,7 +188,7 @@ export default class ShipBoard extends BoardTray {
 				draggedIdx = Math.round(ev.target.offsetLeft / blockSize);
 
 				// store original state
-				[ogLoc1, ogLoc2] = ship.getLocation();
+				[this.#ogLoc1, this.#ogLoc2] = ship.getLocation();
 				ogRotation = ship.getRotation();
 
 				ship.style.setProperty('--opacity', '0.3');
@@ -194,7 +197,7 @@ export default class ShipBoard extends BoardTray {
 				// set state
 				isDragging = true;
 				draggedClone = shipClone.get(ship);
-				draggedShip = ship;
+				this.#draggedShip = ship;
 
 				draggedClone.offsetX = ev.clientX - ship.offsetLeft;
 				draggedClone.offsetY = ev.clientY - ship.offsetTop;
@@ -222,6 +225,8 @@ export default class ShipBoard extends BoardTray {
 				//
 				// if not valid drop, reset cloned ship
 				// also replace ship at og locations
+				// //TODO: TRY_PLACE_SHIP and move the reset logic somewhere else, maybe dont reset this dragged clone rotation
+				// the gameboard will emit the correct signal if its valid or not
 				draggedClone.setRotation(ogRotation);
 				this.resetDropZone();
 			});
@@ -238,7 +243,6 @@ export default class ShipBoard extends BoardTray {
 			}
 		});
 
-		// TODO: also need to re-render highlight areas/dropzone
 		document.addEventListener('keypress', handleDraggedKeyPress.bind(this));
 
 		Array.from(boardGrid.querySelectorAll('.ship-cell')).forEach((cell) =>
@@ -253,6 +257,15 @@ export default class ShipBoard extends BoardTray {
 				}
 			}),
 		);
+
+		em.on(Events.PLACE_SHIP_FAIL, this.restoreShip);
+	}
+
+	restoreShip(shipName) {
+		// TODO: this is not being called when failing ship placement
+		this.#draggedShip.style.setProperty('--opacity', '1');
+		this.#draggedShip.style.pointerEvents = 'all';
+		em.emit(Events.TRY_PLACE_SHIP, shipName, this.#ogLoc1, this.#ogLoc2);
 	}
 
 	resetDropZone() {
@@ -263,14 +276,6 @@ export default class ShipBoard extends BoardTray {
 
 	renderDropZone(x, y, draggedIdx, draggedShip) {
 		this.resetDropZone();
-		// console.dir({
-		// 	x,
-		// 	y,
-		// 	idx: draggedIdx,
-		// 	ship: draggedShip,
-		// 	len: draggedShip.getSize(),
-		// 	rotation: draggedShip.getRotation(),
-		// });
 
 		let curs = new Loc(x, y);
 		let dX;
@@ -290,10 +295,8 @@ export default class ShipBoard extends BoardTray {
 		}
 
 		const distanceToEnd = draggedShip.getSize() - 1 - draggedIdx;
-		console.log('dist:', distanceToEnd);
 
 		const end = new Loc(x, y).moveLoc(dX * distanceToEnd, dY * distanceToEnd);
-		console.log({ start: curs, end });
 		this.addDropZoneClass(curs);
 
 		while (!curs.equal(end)) {
@@ -305,9 +308,7 @@ export default class ShipBoard extends BoardTray {
 		dX = -dX;
 		dY = -dY;
 		for (let i = 0; i < draggedShip.getSize() - 1; i++) {
-			console.log(dX, dY);
 			curs = curs.moveLoc(dX, dY);
-			console.log(curs);
 			this.addDropZoneClass(curs);
 		}
 	}
