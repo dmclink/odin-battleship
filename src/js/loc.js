@@ -15,6 +15,10 @@ class Loc {
 	isOOB(xBound, yBound) {
 		return this.x < 0 || this.y < 0 || this.x > xBound || this.y > yBound;
 	}
+
+	copy() {
+		return new Loc(this.x, this.y);
+	}
 }
 
 export { Loc };

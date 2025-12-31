@@ -176,6 +176,8 @@ class GameBoard {
 		}
 
 		// place the ship
+		console.log('placing ship:', ship.name(), start, end);
+
 		const dX = GameBoard.cmp(end.x, start.x);
 		const dY = GameBoard.cmp(end.y, start.y);
 		let curs = start;
@@ -188,6 +190,27 @@ class GameBoard {
 		ship.place();
 
 		// TODO: emit all ships placed?
+		// if (ships.placed == this.ships().length)
+	}
+
+	unplaceShip(ship) {
+		if (!ship) {
+			throw new Error('is not a valid ship');
+		}
+
+		for (let i = 0; i < this.#board.length; i++) {
+			for (let j = 0; j < this.#board[0].length; j++) {
+				if (this.#board[i][j] === ship) {
+					console.log('overwriting', { row: i, col: j });
+					this.#board[i][j] = undefined;
+				}
+			}
+		}
+
+		ship.unplace();
+		console.log(ship);
+
+		// TODO: emit all ships no longer placed?
 		// if (ships.placed == this.ships().length)
 	}
 
@@ -206,12 +229,14 @@ class GameBoard {
 
 		let curs = start;
 		if (this.#board[curs.y][curs.x] !== undefined) {
+			console.log('not empty:', this.#board[curs.y][curs.x]);
 			return false;
 		}
 
 		while (!curs.equal(end)) {
 			curs = curs.moveLoc(dX, dY);
 			if (this.#board[curs.y][curs.x] !== undefined) {
+				console.log('not empty:', { x: curs.x, y: curs.y, ship: this.#board[curs.y][curs.x] });
 				return false;
 			}
 		}

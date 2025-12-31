@@ -204,25 +204,31 @@ function buildShip(
 class Ship extends HTMLElement {
 	#locked;
 	#shipSize;
+	#shipName;
 	#rotation;
 	#r1;
 	#r2;
 	#c1;
 	#c2;
 
-	constructor(shipSize, blockSize) {
+	constructor(shipSize, blockSize, shipName) {
 		super();
 		this.#locked = false;
 		this.style.transformStyle = 'preserve-3d';
 		this.style.placeSelf = 'start';
 		this.style.cursor = 'pointer';
 		this.#shipSize = shipSize;
+		this.#shipName = shipName;
 		// this.style.transformOrigin = `${(shipSize * blockSize) / 2}px ${blockSize / 2}px`;
 		this.style.transformOrigin = `${blockSize / 2}px ${blockSize / 2}px`;
 		this.#rotation = 0;
 
 		this.setAttribute('tabindex', '0');
 		// this.setAttribute('draggable', 'true');
+	}
+
+	getShipName() {
+		return this.#shipName;
 	}
 
 	renderRotation() {
@@ -265,10 +271,10 @@ class Ship extends HTMLElement {
 	}
 
 	setLocation(start, end) {
-		const r1 = start.x;
-		const r2 = end.x;
-		const c1 = start.y;
-		const c2 = end.y;
+		const c1 = start.x;
+		const c2 = end.x;
+		const r1 = start.y;
+		const r2 = end.y;
 		this.#r1 = r1;
 		this.#r2 = r2;
 		this.#c1 = c1;
@@ -287,7 +293,7 @@ class Ship extends HTMLElement {
 
 class Submarine extends Ship {
 	constructor(blockSize, holeSize) {
-		super(3, blockSize);
+		super(3, blockSize, 'submarine');
 		this.innerHTML = buildShip(
 			blockSize,
 			blockSize,
@@ -305,28 +311,28 @@ class Submarine extends Ship {
 
 class Carrier extends Ship {
 	constructor(blockSize, holeSize) {
-		super(5, blockSize);
+		super(5, blockSize, 'carrier');
 		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 5, 'gray', 'black').innerHTML;
 	}
 }
 
 class Battleship extends Ship {
 	constructor(blockSize, holeSize) {
-		super(4, blockSize);
+		super(4, blockSize, 'battleship');
 		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 4, 'gray', 'black', true, true).innerHTML;
 	}
 }
 
 class Cruiser extends Ship {
 	constructor(blockSize, holeSize) {
-		super(3, blockSize);
+		super(3, blockSize, 'cruiser');
 		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 3, 'gray', 'black', false, true).innerHTML;
 	}
 }
 
 class Destroyer extends Ship {
 	constructor(blockSize, holeSize) {
-		super(2, blockSize);
+		super(2, blockSize, 'destroyer');
 		this.innerHTML = buildShip(blockSize, blockSize, holeSize, 2, 'gray', 'black', true, false).innerHTML;
 	}
 }

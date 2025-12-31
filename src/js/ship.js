@@ -40,6 +40,10 @@ class Ship {
 		this.#placed = true;
 	}
 
+	unplace() {
+		this.#placed = false;
+	}
+
 	isPlaced() {
 		return this.#placed;
 	}

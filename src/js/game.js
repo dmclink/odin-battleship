@@ -132,10 +132,25 @@ class Game {
 		}
 	}
 
+	unplaceShip(shipName) {
+		console.log('unplacing ship');
+		const currentPlayerBoard = this.currentPlayerBoard();
+		const ship = currentPlayerBoard.ships().get(shipName);
+
+		if (!ship) {
+			throw new Error('invalid ship name, does not exist in map');
+		}
+
+		console.log('before: ', this.currentPlayerBoard());
+		currentPlayerBoard.unplaceShip(ship);
+		console.log('after: ', this.currentPlayerBoard());
+	}
+
 	bindEvents() {
 		em.on(Events.SELECT_GAME_TYPE, this.setGameType.bind(this));
 		em.on(Events.GAME_OVER, this.unsetGameType.bind(this));
 		em.on(Events.TRY_PLACE_SHIP, this.tryPlaceShip.bind(this));
+		em.on(Events.UNPLACE_SHIP, this.unplaceShip.bind(this));
 	}
 }
 

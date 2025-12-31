@@ -10,6 +10,9 @@ export default class ShipBoard extends BoardTray {
 	#shipClones;
 	#boardGrid;
 	#draggedShip;
+	#draggedClone;
+	#draggedIdx;
+	#draggedLoc;
 	#ogLoc1;
 	#ogLoc2;
 
@@ -91,23 +94,31 @@ export default class ShipBoard extends BoardTray {
 			destroyer: destroyerClone,
 		} = this.#shipClones;
 
-		const shipClone = new Map();
-
-		shipClone.set(carrier, carrierClone);
-		shipClone.set(battleship, battleshipClone);
-		shipClone.set(submarine, submarineClone);
-		shipClone.set(cruiser, cruiserClone);
-		shipClone.set(destroyer, destroyerClone);
-
+		// const shipClone = new Map();
+		//
+		// shipClone.set(carrier, carrierClone);
+		// shipClone.set(battleship, battleshipClone);
+		// shipClone.set(submarine, submarineClone);
+		// shipClone.set(cruiser, cruiserClone);
+		// shipClone.set(destroyer, destroyerClone);
+		//
+		// const cloneShip = new Map();
+		//
+		// cloneShip.set(carrierClone, carrier);
+		// cloneShip.set(battleshipClone, battleship);
+		// cloneShip.set(submarineClone, submarine);
+		// cloneShip.set(cruiserClone, cruiser);
+		// cloneShip.set(destroyerClone, destroyer);
+		//
 		em.on(Events.PLACE_SHIP_SUCCESS, this.updateShipLocation.bind(this));
 
 		// pick arbitrary starting location on board for ships
 		em.on(Events.GAME_START, () => {
-			em.emit(Events.TRY_PLACE_SHIP, 'carrier', new Loc(0, 0), new Loc(0, 4));
-			em.emit(Events.TRY_PLACE_SHIP, 'battleship', new Loc(1, 0), new Loc(1, 3));
-			em.emit(Events.TRY_PLACE_SHIP, 'submarine', new Loc(2, 0), new Loc(2, 2));
-			em.emit(Events.TRY_PLACE_SHIP, 'cruiser', new Loc(3, 0), new Loc(3, 2));
-			em.emit(Events.TRY_PLACE_SHIP, 'destroyer', new Loc(4, 0), new Loc(4, 1));
+			em.emit(Events.TRY_PLACE_SHIP, 'carrier', new Loc(0, 0), new Loc(4, 0));
+			em.emit(Events.TRY_PLACE_SHIP, 'battleship', new Loc(0, 1), new Loc(3, 1));
+			em.emit(Events.TRY_PLACE_SHIP, 'submarine', new Loc(0, 2), new Loc(2, 2));
+			em.emit(Events.TRY_PLACE_SHIP, 'cruiser', new Loc(0, 3), new Loc(2, 3));
+			em.emit(Events.TRY_PLACE_SHIP, 'destroyer', new Loc(0, 4), new Loc(1, 4));
 		});
 
 		boardGrid.append(battleship, carrier, submarine, cruiser, destroyer);
@@ -147,8 +158,6 @@ export default class ShipBoard extends BoardTray {
 
 		// these are "global" mutated variables to track state and which ship is being dragged by user
 		let isDragging = false;
-		let draggedClone;
-		let draggedIdx;
 
 		const handleRKeyPress = function (ship) {
 			ship.rotateCW();
@@ -167,59 +176,78 @@ export default class ShipBoard extends BoardTray {
 			if (!isDragging) {
 				return;
 			}
-			console.log('firing keydown');
 			if (ev.key === 'r') {
-				console.log('fring r keypress');
-				handleRKeyPress(draggedClone);
+				handleRKeyPress(this.#draggedClone);
 			} else if (ev.key === 'q') {
-				console.log('fring q keypress');
-				handleQKeyPress(draggedClone);
+				handleQKeyPress(this.#draggedClone);
 			}
-			this.renderDropZone(draggedLoc.x, draggedLoc.y, draggedIdx, draggedClone);
+			this.renderDropZone(draggedLoc.x, draggedLoc.y, this.#draggedIdx, this.#draggedClone);
+		};
+
+		const handleMouseDownOnShip = function (ev) {
+			const ship = ev.currentTarget;
+			const clone = this.#shipClones[ship.getShipName()];
+			// const clone = shipClone.get(ship);
+			em.emit(Events.UNPLACE_SHIP, ship.getShipName());
+			this.#draggedIdx = Math.round(ev.target.offsetLeft / blockSize);
+
+			// store original state
+			[this.#ogLoc1, this.#ogLoc2] = ship.getLocation();
+			ogRotation = ship.getRotation();
+
+			ship.style.setProperty('--opacity', '0.3');
+			ship.style.pointerEvents = 'none';
+
+			// set state
+			isDragging = true;
+			// this.#draggedClone = shipClone.get(ship);
+			this.#draggedClone = clone;
+			this.#draggedShip = ship;
+
+			this.#draggedClone.offsetX = ev.clientX - ship.offsetLeft;
+			this.#draggedClone.offsetY = ev.clientY - ship.offsetTop;
+			this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.offsetX}px`;
+			this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.offsetY}px`;
+
+			// gets the rotation around the grab/drag point
+			this.#draggedClone.style.transformOrigin = `${ev.target.offsetLeft + ev.offsetX}px ${ev.target.offsetTop + ev.offsetY}px`;
+
+			clone.style.display = 'block';
 		};
 
 		// html dragging API isn't working for passing data back and forth and firing events properly
 		// so we implement bespoke drag with mousedown mouseup etc
 		for (const ship of Object.values(this.#ships)) {
-			const clone = shipClone.get(ship);
+			// const clone = shipClone.get(ship);
+			this.#shipClones[ship.getShipName()];
 
-			ship.addEventListener('mousedown', (ev) => {
-				// TODO: unplace ship from gameboard
-				draggedIdx = Math.round(ev.target.offsetLeft / blockSize);
+			ship.addEventListener('mousedown', handleMouseDownOnShip.bind(this));
 
-				// store original state
-				[this.#ogLoc1, this.#ogLoc2] = ship.getLocation();
-				ogRotation = ship.getRotation();
+			// ship.addEventListener('dragend', (ev) => {
+			// 	ship.style.setProperty('--opacity', '1');
+			// 	isDragging = false;
+			// });
+		}
 
-				ship.style.setProperty('--opacity', '0.3');
-				ship.style.pointerEvents = 'none';
-
-				// set state
-				isDragging = true;
-				draggedClone = shipClone.get(ship);
-				this.#draggedShip = ship;
-
-				draggedClone.offsetX = ev.clientX - ship.offsetLeft;
-				draggedClone.offsetY = ev.clientY - ship.offsetTop;
-				draggedClone.style.left = `${ev.clientX - draggedClone.offsetX}px`;
-				draggedClone.style.top = `${ev.clientY - draggedClone.offsetY}px`;
-
-				// gets the rotation around the grab/drag point
-				draggedClone.style.transformOrigin = `${ev.target.offsetLeft + ev.offsetX}px ${ev.target.offsetTop + ev.offsetY}px`;
-
-				clone.style.display = 'block';
-			});
-
-			// mouseup on document because clones have no pointer events for passthrough on hover
-			// this is the drop event
-			document.addEventListener('mouseup', (ev) => {
+		// mouseup on document because clones have no pointer events for passthrough on hover
+		// this is the drop event
+		document.addEventListener('mouseup', (ev) => {
+			if (isDragging) {
+				const ship = this.#draggedShip;
 				ship.style.setProperty('--opacity', '1');
 				ship.style.pointerEvents = 'all';
 
 				isDragging = false;
 
-				draggedClone.style.display = 'none';
+				this.#draggedClone.style.display = 'none';
 
+				// TODO: calculate start and end locations
+				//
+				const { start, end } = this.draggedStartEndLoc();
+				console.log({ start, end });
+
+				console.log('trying to place at:', { start: start.moveLoc(-1, -1), end: end.moveLoc(-1, -1) });
+				em.emit(Events.TRY_PLACE_SHIP, ship.getShipName(), start.moveLoc(-1, -1), end.moveLoc(-1, -1));
 				// TODO:
 				// if valid drop, place ship at the new location on gameboard
 				//
@@ -227,19 +255,15 @@ export default class ShipBoard extends BoardTray {
 				// also replace ship at og locations
 				// //TODO: TRY_PLACE_SHIP and move the reset logic somewhere else, maybe dont reset this dragged clone rotation
 				// the gameboard will emit the correct signal if its valid or not
-				draggedClone.setRotation(ogRotation);
+				this.#draggedClone.setRotation(ogRotation);
 				this.resetDropZone();
-			});
+			}
+		});
 
-			// ship.addEventListener('dragend', (ev) => {
-			// 	ship.style.setProperty('--opacity', '1');
-			// 	isDragging = false;
-			// });
-		}
 		document.addEventListener('pointermove', (ev) => {
 			if (isDragging) {
-				draggedClone.style.left = `${ev.clientX - draggedClone.offsetX}px`;
-				draggedClone.style.top = `${ev.clientY - draggedClone.offsetY}px`;
+				this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.offsetX}px`;
+				this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.offsetY}px`;
 			}
 		});
 
@@ -251,14 +275,104 @@ export default class ShipBoard extends BoardTray {
 					const x = ev.target.getAttribute('data-col');
 					const y = ev.target.getAttribute('data-row');
 					draggedLoc = new Loc(Number(x), Number(y));
-					this.renderDropZone(Number(x), Number(y), draggedIdx, draggedClone);
+					this.#draggedLoc = draggedLoc;
+					this.renderDropZone(Number(x), Number(y), this.#draggedIdx, this.#draggedClone);
 					// ev.target is the cells we drag over, cells have the data-row data-col
 					// console.log(ev.target);
 				}
 			}),
 		);
 
-		em.on(Events.PLACE_SHIP_FAIL, this.restoreShip);
+		em.on(Events.PLACE_SHIP_FAIL, this.restoreShip.bind(this));
+	}
+
+	static boundInRange(num, lower, upper) {
+		let result = num;
+		result = result > upper ? upper : result;
+		result = result < lower ? lower : result;
+		return result;
+	}
+
+	draggedStartEndLoc() {
+		const draggedShip = this.#draggedShip;
+		const size = draggedShip.getSize();
+		const { x } = this.#draggedLoc;
+		const { y } = this.#draggedLoc;
+		let curs = new Loc(x, y);
+		let dX;
+		let dY;
+		if (draggedShip.getRotation() === 0) {
+			dX = 1;
+			dY = 0;
+		} else if (draggedShip.getRotation() === 180) {
+			dX = -1;
+			dY = 0;
+		} else if (draggedShip.getRotation() === 90) {
+			dY = 1;
+			dX = 0;
+		} else if (draggedShip.getRotation() === 270) {
+			dY = -1;
+			dX = 0;
+		}
+
+		// distanceToStart = this.#draggedIdx
+		const distanceToEnd = draggedShip.getSize() - 1 - this.#draggedIdx;
+
+		const maxstart = new Loc(x, y).moveLoc(dX * -this.#draggedIdx, dY * -this.#draggedIdx);
+		const maxend = new Loc(x, y).moveLoc(dX * distanceToEnd, dY * distanceToEnd);
+
+		console.log({ x, y, dX, dY });
+		// TODO: EVERYTHIN IS OFF BY 1
+		const locOOB = function (loc) {
+			return loc.x > 10 || loc.y > 10 || loc.x < 1 || loc.y < 1;
+		};
+
+		const sizeOffset = size - 1;
+		if (locOOB(maxend)) {
+			let { x, y } = maxend;
+			x = ShipBoard.boundInRange(x, 1, 10);
+			y = ShipBoard.boundInRange(y, 1, 10);
+
+			const end = new Loc(x, y);
+			const start = new Loc(dX * -sizeOffset + end.x, dY * -sizeOffset + end.y);
+			console.log('returning early maxend');
+			return { start, end };
+		}
+
+		if (locOOB(maxstart)) {
+			let { x, y } = maxstart;
+			x = ShipBoard.boundInRange(x, 1, 10);
+			y = ShipBoard.boundInRange(y, 1, 10);
+
+			const start = new Loc(x, y);
+			const end = new Loc(dX * sizeOffset + start.x, dY * sizeOffset + start.y);
+			console.log('returning early maxstart');
+			return { start, end };
+		}
+
+		this.addDropZoneClass(curs);
+
+		const cursIsOOB = function () {
+			return curs.x >= 10 || curs.y >= 10 || curs.x <= 1 || curs.y <= 1;
+		};
+
+		while (!curs.equal(maxend)) {
+			curs = curs.moveLoc(dX, dY);
+			this.addDropZoneClass(curs);
+		}
+		const end = curs.copy();
+
+		// reverse direction towards start
+		dX = -dX;
+		dY = -dY;
+		for (let i = 0; i < draggedShip.getSize() - 1; i++) {
+			curs = curs.moveLoc(dX, dY);
+			this.addDropZoneClass(curs);
+		}
+
+		const start = curs.copy();
+
+		return { start, end };
 	}
 
 	restoreShip(shipName) {
@@ -294,7 +408,7 @@ export default class ShipBoard extends BoardTray {
 			dX = 0;
 		}
 
-		const distanceToEnd = draggedShip.getSize() - 1 - draggedIdx;
+		const distanceToEnd = draggedShip.getSize() - 1 - this.#draggedIdx;
 
 		const end = new Loc(x, y).moveLoc(dX * distanceToEnd, dY * distanceToEnd);
 		this.addDropZoneClass(curs);
