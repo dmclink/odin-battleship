@@ -176,7 +176,7 @@ class GameBoard {
 		}
 
 		// place the ship
-		console.log('placing ship:', ship.name(), start, end);
+		console.log('placing ship:', { name: ship.name(), start0idx: start, end0idx: end });
 
 		const dX = GameBoard.cmp(end.x, start.x);
 		const dY = GameBoard.cmp(end.y, start.y);

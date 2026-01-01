@@ -151,12 +151,15 @@ function buildShip(
 	rightShape = 'bevel',
 ) {
 	const result = document.createElement('div');
+	const container = document.createElement('div');
+
 	const style = document.createElement('style');
 	style.innerHTML = `
       .ship {
         box-sizing: border-box;
         display: grid;
         place-items: center;
+	    transform-origin: 50% 50%;
         & * {
           box-sizing: inherit;
         }
@@ -171,12 +174,20 @@ function buildShip(
 	result.appendChild(style);
 	result.style.transformStyle = 'preserve-3d';
 	result.classList.add('ship');
-	result.style.width = `${blockSize * numHoles}px`;
+	result.style.height = '100%';
+	result.style.width = '100%';
+
+	container.classList.add('rotation-container');
+
+	container.style.transformStyle = 'preserve-3d';
+	container.style.transformOrigin = `center`;
+	container.style.width = '100%';
+	container.style.height = '100%';
 
 	const wall1 = buildWall(blockSize, depth, numHoles, color, leftBevel, rightBevel);
 	const wall2 = buildWall(blockSize, depth, numHoles, color, leftBevel, rightBevel);
-	result.appendChild(wall1);
-	result.appendChild(wall2);
+	container.appendChild(wall1);
+	container.appendChild(wall2);
 
 	const top = buildTop(
 		blockSize,
@@ -196,7 +207,9 @@ function buildShip(
 	wall2.style.position = 'absolute';
 	top.style.position = 'absolute';
 	top.style.transform = `translateZ(${blockSize / 2}px)`;
-	result.appendChild(top);
+	container.appendChild(top);
+
+	result.appendChild(container);
 
 	return result;
 }
@@ -210,21 +223,25 @@ class Ship extends HTMLElement {
 	#r2;
 	#c1;
 	#c2;
+	#transformOrigins;
 
 	constructor(shipSize, blockSize, shipName) {
 		super();
 		this.#locked = false;
+		this.style.height = '100%';
+		this.style.width = '100%';
 		this.style.transformStyle = 'preserve-3d';
 		this.style.placeSelf = 'start';
 		this.style.cursor = 'pointer';
 		this.#shipSize = shipSize;
 		this.#shipName = shipName;
-		// this.style.transformOrigin = `${(shipSize * blockSize) / 2}px ${blockSize / 2}px`;
-		this.style.transformOrigin = `${blockSize / 2}px ${blockSize / 2}px`;
+		this.#transformOrigins = [
+			`center`,
+			`${blockSize / 2}px ${blockSize / 2}px`,
+			`center`,
+			`${(shipSize * blockSize) / 2}px ${(shipSize * blockSize) / 2}px`,
+		];
 		this.#rotation = 0;
-
-		this.setAttribute('tabindex', '0');
-		// this.setAttribute('draggable', 'true');
 	}
 
 	getShipName() {
@@ -232,7 +249,11 @@ class Ship extends HTMLElement {
 	}
 
 	renderRotation() {
-		this.style.transform = `rotateZ(${this.#rotation}deg)`;
+		const rotationContainer = this.querySelector('.rotation-container');
+		rotationContainer.style.transform = `rotateZ(${this.#rotation}deg)`;
+		const rotationIndex = Math.round(this.#rotation / 90);
+		const transformString = this.#transformOrigins[rotationIndex];
+		rotationContainer.style.transformOrigin = transformString;
 	}
 
 	rotateCW() {
@@ -271,10 +292,16 @@ class Ship extends HTMLElement {
 	}
 
 	setLocation(start, end) {
-		const c1 = start.x;
-		const c2 = end.x;
-		const r1 = start.y;
-		const r2 = end.y;
+		let c1 = start.x;
+		let c2 = end.x;
+		if (c1 > c2) {
+			[c1, c2] = [c2, c1];
+		}
+		let r1 = start.y;
+		let r2 = end.y;
+		if (r1 > r2) {
+			[r1, r2] = [r2, r1];
+		}
 		this.#r1 = r1;
 		this.#r2 = r2;
 		this.#c1 = c1;
