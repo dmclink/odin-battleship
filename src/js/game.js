@@ -133,7 +133,6 @@ class Game {
 	}
 
 	unplaceShip(shipName) {
-		console.log('unplacing ship');
 		const currentPlayerBoard = this.currentPlayerBoard();
 		const ship = currentPlayerBoard.ships().get(shipName);
 
@@ -141,9 +140,7 @@ class Game {
 			throw new Error('invalid ship name, does not exist in map');
 		}
 
-		console.log('before: ', this.currentPlayerBoard());
 		currentPlayerBoard.unplaceShip(ship);
-		console.log('after: ', this.currentPlayerBoard());
 	}
 
 	bindEvents() {

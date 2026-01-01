@@ -159,7 +159,7 @@ function buildShip(
         box-sizing: border-box;
         display: grid;
         place-items: center;
-	    transform-origin: 50% 50%;
+	    transform-style: preserve-3d;
         & * {
           box-sizing: inherit;
         }
@@ -172,17 +172,16 @@ function buildShip(
 	  }
     `;
 	result.appendChild(style);
-	result.style.transformStyle = 'preserve-3d';
 	result.classList.add('ship');
-	result.style.height = '100%';
-	result.style.width = '100%';
+	result.style.width = `${blockSize * numHoles}px`;
+	console.log(result.style.width);
+	result.style.height = `${blockSize}px`;
 
 	container.classList.add('rotation-container');
 
 	container.style.transformStyle = 'preserve-3d';
-	container.style.transformOrigin = `center`;
-	container.style.width = '100%';
-	container.style.height = '100%';
+	container.style.width = `${blockSize * numHoles}px`;
+	container.style.height = `${blockSize}px`;
 
 	const wall1 = buildWall(blockSize, depth, numHoles, color, leftBevel, rightBevel);
 	const wall2 = buildWall(blockSize, depth, numHoles, color, leftBevel, rightBevel);
@@ -228,8 +227,6 @@ class Ship extends HTMLElement {
 	constructor(shipSize, blockSize, shipName) {
 		super();
 		this.#locked = false;
-		this.style.height = '100%';
-		this.style.width = '100%';
 		this.style.transformStyle = 'preserve-3d';
 		this.style.placeSelf = 'start';
 		this.style.cursor = 'pointer';
@@ -251,6 +248,10 @@ class Ship extends HTMLElement {
 	renderRotation() {
 		const rotationContainer = this.querySelector('.rotation-container');
 		rotationContainer.style.transform = `rotateZ(${this.#rotation}deg)`;
+	}
+
+	updateTransformOrigin() {
+		const rotationContainer = this.querySelector('.rotation-container');
 		const rotationIndex = Math.round(this.#rotation / 90);
 		const transformString = this.#transformOrigins[rotationIndex];
 		rotationContainer.style.transformOrigin = transformString;

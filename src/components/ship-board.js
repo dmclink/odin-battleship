@@ -41,9 +41,6 @@ export default class ShipBoard extends BoardTray {
 			cell.style.height = '100%';
 			cell.style.width = '100%';
 			cell.classList.add('ship-cell');
-			// cell.style.transform = 'translateZ(10px)';
-			// cell.style.display = 'grid';
-			// cell.style.placeItems = 'center';
 			const row = Math.floor(i / 10) + 1;
 			const col = (i % 10) + 1;
 			cell.setAttribute('data-row', row);
@@ -62,8 +59,6 @@ export default class ShipBoard extends BoardTray {
 
 			boardGrid.appendChild(cell);
 			trayFaceFront.appendChild(newCyl);
-			// cell.appendChild(newCyl);
-			// trayFaceFront.appendChild(cell);
 		}
 
 		const shipGrid = this.querySelector('#ship-grid');
@@ -105,25 +100,29 @@ export default class ShipBoard extends BoardTray {
 		});
 
 		boardGrid.append(battleship, carrier, submarine, cruiser, destroyer);
-		boardGrid.append(battleshipClone, carrierClone, submarineClone, cruiserClone, destroyerClone);
+		// boardGrid.append(battleshipClone, carrierClone, submarineClone, cruiserClone, destroyerClone);
+		document
+			.querySelector('.game-screen')
+			.append(battleshipClone, carrierClone, submarineClone, cruiserClone, destroyerClone);
 
 		// apply special styles to clone ships so they only display when dragging and can follow mouse
 		for (const [, shipClone] of Object.entries(this.#shipClones)) {
+			// cache these so we don't cause redraws, they shouldn't change
+			shipClone.width = blockSize * shipClone.getSize();
+			shipClone.height = blockSize;
+
 			shipClone.style.position = 'absolute';
 			shipClone.style.display = 'none';
 			shipClone.style.pointerEvents = 'none';
 		}
 
-		// these are "global" mutated variables to track state and which ship is being dragged by user
-
 		const handleMouseDownOnShip = function (ev) {
 			const ship = ev.currentTarget;
 			const clone = this.#shipClones[ship.getShipName()];
-			// const clone = shipClone.get(ship);
 			em.emit(Events.UNPLACE_SHIP, ship.getShipName());
 			this.#draggedIdx = Math.round(ev.target.offsetLeft / blockSize);
 
-			// store original state
+			// store original state in case of failure placement we place ship back
 			[this.#ogLoc1, this.#ogLoc2] = ship.getLocation();
 			this.#ogRotation = ship.getRotation();
 
@@ -132,18 +131,11 @@ export default class ShipBoard extends BoardTray {
 
 			// set state
 			this.#isDragging = true;
-			// this.#draggedClone = shipClone.get(ship);
 			this.#draggedClone = clone;
 			this.#draggedShip = ship;
 
-			this.#draggedClone.offsetX = ev.clientX - ship.offsetLeft;
-			this.#draggedClone.offsetY = ev.clientY - ship.offsetTop;
-			this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.offsetX}px`;
-			this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.offsetY}px`;
-
-			// gets the rotation around the grab/drag point
-			// FIX: just always hvae transform origin be centered on the thing
-			// and snap the center of the draggedClone to the mouse
+			this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.width / 2}px`;
+			this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.height / 2}px`;
 
 			clone.style.display = 'block';
 		};
@@ -158,26 +150,37 @@ export default class ShipBoard extends BoardTray {
 
 		// mouseup on document because clones have no pointer events for passthrough on hover
 		// this is the drop event
-		document.addEventListener('mouseup', (ev) => {
+		document.addEventListener('mouseup', () => {
 			if (this.#isDragging) {
-				const ship = this.#draggedShip;
-				ship.style.setProperty('--opacity', '1');
-				ship.style.pointerEvents = 'all';
+				this.#draggedShip.style.setProperty('--opacity', '1');
+				this.#draggedShip.style.pointerEvents = 'all';
 
 				this.#isDragging = false;
 
 				this.#draggedClone.style.display = 'none';
 
 				const { start, end } = this.draggedStartEndLoc();
+
 				// need to decrement since shipboard grid element is 1 indexed and gameboard grid for logic is 0 indexed
-				em.emit(Events.TRY_PLACE_SHIP, ship.getShipName(), start.moveLoc(-1, -1), end.moveLoc(-1, -1));
+				em.emit(
+					Events.TRY_PLACE_SHIP,
+					this.#draggedShip.getShipName(),
+					start.moveLoc(-1, -1),
+					end.moveLoc(-1, -1),
+				);
 			}
+			// TODO: get a way to check if the ship is dragged? or change this event to REPLACE_SHIP
+			// there's a bug if you click too many ships before the other one places it will "place" on the ui
+			// but be unplaced on the game logic
+			// else if (this.#draggedShip) {
+			// 	em.emit(Events.TRY_PLACE_SHIP, this.#draggedShip.getShipName(), this.#ogLoc1, this.#ogLoc2);
+			// }
 		});
 
 		document.addEventListener('pointermove', (ev) => {
 			if (this.#isDragging) {
-				this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.offsetX}px`;
-				this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.offsetY}px`;
+				this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.width / 2}px`;
+				this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.height / 2}px`;
 			}
 		});
 
@@ -190,7 +193,6 @@ export default class ShipBoard extends BoardTray {
 					const y = ev.target.getAttribute('data-row');
 					this.#draggedLoc = new Loc(Number(x), Number(y));
 					this.renderDropZone(Number(x), Number(y), this.#draggedIdx, this.#draggedClone);
-					// ev.target is the cells we drag over, cells have the data-row data-col
 				}
 			}),
 		);
@@ -259,10 +261,6 @@ export default class ShipBoard extends BoardTray {
 		}
 
 		this.addDropZoneClass(curs);
-
-		const cursIsOOB = function () {
-			return curs.x >= 10 || curs.y >= 10 || curs.x <= 1 || curs.y <= 1;
-		};
 
 		while (!curs.equal(maxend)) {
 			curs = curs.moveLoc(dX, dY);
@@ -357,11 +355,13 @@ export default class ShipBoard extends BoardTray {
 	updateShipLocation(shipName, start, end) {
 		this.resetDropZone();
 		const ship = this.#ships[shipName];
-		ship.setRotation(this.#shipClones[shipName].getRotation());
 		if (!ship) {
 			throw new Error('no ship by name ship:', shipName);
 		}
+
+		ship.setRotation(this.#shipClones[shipName].getRotation());
 		ship.setLocation(start, end);
+		ship.updateTransformOrigin();
 	}
 
 	handleRKeyPress() {

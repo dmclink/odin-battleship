@@ -233,6 +233,14 @@ game-board {
 	transform: rotateX(-80deg) translateZ(800px);
 }
 
+.game-screen {
+	position: fixed;
+	height: 100vh;
+	width: 100vw;
+	z-index: 10;
+	pointer-events: none;
+}
+
 .board {
 	width: var(--size);
 	height: var(--size);
