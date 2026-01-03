@@ -208,12 +208,8 @@ export default class ShipBoard extends BoardTray {
 		return result;
 	}
 
-	draggedStartEndLoc() {
+	draggedDeltas() {
 		const draggedShip = this.#draggedClone;
-		const size = draggedShip.getSize();
-		const { x } = this.#draggedLoc;
-		const { y } = this.#draggedLoc;
-		let curs = new Loc(x, y);
 		let dX;
 		let dY;
 		if (draggedShip.getRotation() === 0) {
@@ -229,6 +225,18 @@ export default class ShipBoard extends BoardTray {
 			dY = -1;
 			dX = 0;
 		}
+
+		return { dX, dY };
+	}
+
+	draggedStartEndLoc() {
+		const draggedShip = this.#draggedClone;
+		const size = draggedShip.getSize();
+		const { x } = this.#draggedLoc;
+		const { y } = this.#draggedLoc;
+		let curs = new Loc(x, y);
+
+		let { dX, dY } = this.draggedDeltas();
 
 		// distanceToStart = this.#draggedIdx
 		const distanceToEnd = draggedShip.getSize() - 1 - this.#draggedIdx;
@@ -299,39 +307,15 @@ export default class ShipBoard extends BoardTray {
 	renderDropZone(x, y, draggedIdx, draggedShip) {
 		this.resetDropZone();
 
-		// TODO: refactor use draggedStartEndLoc and just color the blocks between them
+		const { start, end } = this.draggedStartEndLoc();
 
-		let curs = new Loc(x, y);
-		let dX;
-		let dY;
-		if (draggedShip.getRotation() === 0) {
-			dX = 1;
-			dY = 0;
-		} else if (draggedShip.getRotation() === 180) {
-			dX = -1;
-			dY = 0;
-		} else if (draggedShip.getRotation() === 90) {
-			dY = 1;
-			dX = 0;
-		} else if (draggedShip.getRotation() === 270) {
-			dY = -1;
-			dX = 0;
-		}
+		let curs = start;
 
-		const distanceToEnd = draggedShip.getSize() - 1 - this.#draggedIdx;
+		const { dX, dY } = this.draggedDeltas();
 
-		const end = new Loc(x, y).moveLoc(dX * distanceToEnd, dY * distanceToEnd);
 		this.addDropZoneClass(curs);
 
 		while (!curs.equal(end)) {
-			curs = curs.moveLoc(dX, dY);
-			this.addDropZoneClass(curs);
-		}
-
-		// reverse direction towards start
-		dX = -dX;
-		dY = -dY;
-		for (let i = 0; i < draggedShip.getSize() - 1; i++) {
 			curs = curs.moveLoc(dX, dY);
 			this.addDropZoneClass(curs);
 		}
