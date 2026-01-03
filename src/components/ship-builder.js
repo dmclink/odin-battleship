@@ -174,7 +174,6 @@ function buildShip(
 	result.appendChild(style);
 	result.classList.add('ship');
 	result.style.width = `${blockSize * numHoles}px`;
-	console.log(result.style.width);
 	result.style.height = `${blockSize}px`;
 
 	container.classList.add('rotation-container');

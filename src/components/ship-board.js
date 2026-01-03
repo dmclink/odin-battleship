@@ -6,6 +6,8 @@ import { Events } from '../js/events.js';
 import { Loc } from '../js/loc.js';
 
 export default class ShipBoard extends BoardTray {
+	#blockSize;
+	#holeSize;
 	#ships;
 	#shipClones;
 	#boardGrid;
@@ -21,6 +23,8 @@ export default class ShipBoard extends BoardTray {
 	constructor(blockSize, holeSize, colorPrimary, colorSecondary, gridSize) {
 		super(blockSize, colorPrimary, colorSecondary, gridSize);
 		this.#isDragging = false;
+		this.#blockSize = blockSize;
+		this.#holeSize = holeSize;
 
 		const trayFaceFront = this.querySelector('.tray-face.front');
 		const boardGrid = this.querySelector('.board-grid');
@@ -61,22 +65,27 @@ export default class ShipBoard extends BoardTray {
 			trayFaceFront.appendChild(newCyl);
 		}
 
+		this.buildShips();
+		this.bindEvents();
+	}
+
+	buildShips() {
 		const shipGrid = this.querySelector('#ship-grid');
 
 		this.#ships = {
-			carrier: new Carrier(blockSize, holeSize, shipGrid),
-			battleship: new Battleship(blockSize, holeSize, shipGrid),
-			submarine: new Submarine(blockSize, holeSize, shipGrid),
-			cruiser: new Cruiser(blockSize, holeSize, shipGrid),
-			destroyer: new Destroyer(blockSize, holeSize, shipGrid),
+			carrier: new Carrier(this.#blockSize, this.#holeSize, shipGrid),
+			battleship: new Battleship(this.#blockSize, this.#holeSize, shipGrid),
+			submarine: new Submarine(this.#blockSize, this.#holeSize, shipGrid),
+			cruiser: new Cruiser(this.#blockSize, this.#holeSize, shipGrid),
+			destroyer: new Destroyer(this.#blockSize, this.#holeSize, shipGrid),
 		};
 
 		this.#shipClones = {
-			carrier: new Carrier(blockSize, holeSize, shipGrid),
-			battleship: new Battleship(blockSize, holeSize, shipGrid),
-			submarine: new Submarine(blockSize, holeSize, shipGrid),
-			cruiser: new Cruiser(blockSize, holeSize, shipGrid),
-			destroyer: new Destroyer(blockSize, holeSize, shipGrid),
+			carrier: new Carrier(this.#blockSize, this.#holeSize, shipGrid),
+			battleship: new Battleship(this.#blockSize, this.#holeSize, shipGrid),
+			submarine: new Submarine(this.#blockSize, this.#holeSize, shipGrid),
+			cruiser: new Cruiser(this.#blockSize, this.#holeSize, shipGrid),
+			destroyer: new Destroyer(this.#blockSize, this.#holeSize, shipGrid),
 		};
 
 		const { carrier, battleship, submarine, cruiser, destroyer } = this.#ships;
@@ -88,8 +97,24 @@ export default class ShipBoard extends BoardTray {
 			destroyer: destroyerClone,
 		} = this.#shipClones;
 
-		em.on(Events.PLACE_SHIP_SUCCESS, this.updateShipLocation.bind(this));
+		this.#boardGrid.append(battleship, carrier, submarine, cruiser, destroyer);
+		document
+			.querySelector('.game-screen')
+			.append(battleshipClone, carrierClone, submarineClone, cruiserClone, destroyerClone);
 
+		// apply special styles to clone ships so they only display when dragging and can follow mouse
+		for (const [, shipClone] of Object.entries(this.#shipClones)) {
+			// cache these so we don't cause redraws, they shouldn't change
+			shipClone.width = this.#blockSize * shipClone.getSize();
+			shipClone.height = this.#blockSize;
+
+			shipClone.style.position = 'absolute';
+			shipClone.style.display = 'none';
+			shipClone.style.pointerEvents = 'none';
+		}
+	}
+
+	bindEvents() {
 		// pick arbitrary starting location on board for ships
 		em.on(Events.GAME_START, () => {
 			em.emit(Events.TRY_PLACE_SHIP, 'carrier', new Loc(0, 0), new Loc(4, 0));
@@ -99,105 +124,81 @@ export default class ShipBoard extends BoardTray {
 			em.emit(Events.TRY_PLACE_SHIP, 'destroyer', new Loc(0, 4), new Loc(1, 4));
 		});
 
-		boardGrid.append(battleship, carrier, submarine, cruiser, destroyer);
-		// boardGrid.append(battleshipClone, carrierClone, submarineClone, cruiserClone, destroyerClone);
-		document
-			.querySelector('.game-screen')
-			.append(battleshipClone, carrierClone, submarineClone, cruiserClone, destroyerClone);
-
-		// apply special styles to clone ships so they only display when dragging and can follow mouse
-		for (const [, shipClone] of Object.entries(this.#shipClones)) {
-			// cache these so we don't cause redraws, they shouldn't change
-			shipClone.width = blockSize * shipClone.getSize();
-			shipClone.height = blockSize;
-
-			shipClone.style.position = 'absolute';
-			shipClone.style.display = 'none';
-			shipClone.style.pointerEvents = 'none';
-		}
-
-		const handleMouseDownOnShip = function (ev) {
-			const ship = ev.currentTarget;
-			const clone = this.#shipClones[ship.getShipName()];
-			em.emit(Events.UNPLACE_SHIP, ship.getShipName());
-			this.#draggedIdx = Math.round(ev.target.offsetLeft / blockSize);
-
-			// store original state in case of failure placement we place ship back
-			[this.#ogLoc1, this.#ogLoc2] = ship.getLocation();
-			this.#ogRotation = ship.getRotation();
-
-			ship.style.setProperty('--opacity', '0.3');
-			ship.style.pointerEvents = 'none';
-
-			// set state
-			this.#isDragging = true;
-			this.#draggedClone = clone;
-			this.#draggedShip = ship;
-
-			this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.width / 2}px`;
-			this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.height / 2}px`;
-
-			clone.style.display = 'block';
-		};
+		em.on(Events.PLACE_SHIP_SUCCESS, this.updateShipLocation.bind(this));
+		em.on(Events.PLACE_SHIP_FAIL, this.restoreShips.bind(this));
 
 		// html dragging API isn't working for passing data back and forth and firing events properly
 		// so we implement bespoke drag with mousedown mouseup etc
 		for (const ship of Object.values(this.#ships)) {
-			this.#shipClones[ship.getShipName()];
-
-			ship.addEventListener('mousedown', handleMouseDownOnShip.bind(this));
+			ship.addEventListener('mousedown', this.handleMouseDownOnShip.bind(this));
 		}
 
 		// mouseup on document because clones have no pointer events for passthrough on hover
 		// this is the drop event
-		document.addEventListener('mouseup', () => {
-			if (this.#isDragging) {
-				this.#draggedShip.style.setProperty('--opacity', '1');
-				this.#draggedShip.style.pointerEvents = 'all';
-
-				this.#isDragging = false;
-
-				this.#draggedClone.style.display = 'none';
-
-				const { start, end } = this.draggedStartEndLoc();
-
-				// need to decrement since shipboard grid element is 1 indexed and gameboard grid for logic is 0 indexed
-				em.emit(
-					Events.TRY_PLACE_SHIP,
-					this.#draggedShip.getShipName(),
-					start.moveLoc(-1, -1),
-					end.moveLoc(-1, -1),
-				);
-			}
-			// TODO: get a way to check if the ship is dragged? or change this event to REPLACE_SHIP
-			// there's a bug if you click too many ships before the other one places it will "place" on the ui
-			// but be unplaced on the game logic
-			// else if (this.#draggedShip) {
-			// 	em.emit(Events.TRY_PLACE_SHIP, this.#draggedShip.getShipName(), this.#ogLoc1, this.#ogLoc2);
-			// }
-		});
-
-		document.addEventListener('pointermove', (ev) => {
-			if (this.#isDragging) {
-				this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.width / 2}px`;
-				this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.height / 2}px`;
-			}
-		});
-
+		document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+		document.addEventListener('pointermove', this.handlePointerMove.bind(this));
 		document.addEventListener('keypress', this.handleDraggedKeyPress.bind(this));
-
-		Array.from(boardGrid.querySelectorAll('.ship-cell')).forEach((cell) =>
-			cell.addEventListener('mouseenter', (ev) => {
-				if (this.#isDragging) {
-					const x = ev.target.getAttribute('data-col');
-					const y = ev.target.getAttribute('data-row');
-					this.#draggedLoc = new Loc(Number(x), Number(y));
-					this.renderDropZone(Number(x), Number(y), this.#draggedIdx, this.#draggedClone);
-				}
-			}),
+		Array.from(this.#boardGrid.querySelectorAll('.ship-cell')).forEach((cell) =>
+			cell.addEventListener('mouseenter', this.handleCellDrag.bind(this)),
 		);
+	}
 
-		em.on(Events.PLACE_SHIP_FAIL, this.restoreShips.bind(this));
+	handleMouseDownOnShip(ev) {
+		const ship = ev.currentTarget;
+		const clone = this.#shipClones[ship.getShipName()];
+		em.emit(Events.UNPLACE_SHIP, ship.getShipName());
+		this.#draggedIdx = Math.round(ev.target.offsetLeft / this.#blockSize);
+
+		// store original state in case of failure placement we place ship back
+		[this.#ogLoc1, this.#ogLoc2] = ship.getLocation();
+		this.#ogRotation = ship.getRotation();
+
+		ship.style.setProperty('--opacity', '0.3');
+		ship.style.pointerEvents = 'none';
+
+		// set state
+		this.#isDragging = true;
+		this.#draggedClone = clone;
+		this.#draggedShip = ship;
+
+		this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.width / 2}px`;
+		this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.height / 2}px`;
+
+		clone.style.display = 'block';
+	}
+
+	handleMouseUp() {
+		if (this.#isDragging) {
+			this.#draggedShip.style.setProperty('--opacity', '1');
+			this.#draggedShip.style.pointerEvents = 'all';
+
+			this.#draggedClone.style.display = 'none';
+
+			this.#isDragging = false;
+
+			const { start, end } = this.draggedStartEndLoc();
+
+			// need to decrement since shipboard grid element is 1 indexed and gameboard grid for logic is 0 indexed
+			em.emit(Events.TRY_PLACE_SHIP, this.#draggedShip.getShipName(), start.moveLoc(-1, -1), end.moveLoc(-1, -1));
+			this.#draggedShip = null;
+			this.#draggedClone = null;
+		}
+	}
+
+	handlePointerMove(ev) {
+		if (this.#isDragging) {
+			this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.width / 2}px`;
+			this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.height / 2}px`;
+		}
+	}
+
+	handleCellDrag(ev) {
+		if (this.#isDragging) {
+			const x = ev.target.getAttribute('data-col');
+			const y = ev.target.getAttribute('data-row');
+			this.#draggedLoc = new Loc(Number(x), Number(y));
+			this.renderDropZone(Number(x), Number(y), this.#draggedIdx, this.#draggedClone);
+		}
 	}
 
 	static boundInRange(num, lower, upper) {

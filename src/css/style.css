@@ -230,7 +230,7 @@ game-board {
 	place-items: center;
 	--color-primary: #4468ea;
 	--color-secondary: #203a99;
-	transform: rotateX(-80deg) translateZ(800px);
+	transform: rotateX(-80deg) translateZ(500px);
 }
 
 .game-screen {
