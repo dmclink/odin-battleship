@@ -144,27 +144,29 @@ export default class ShipBoard extends BoardTray {
 	}
 
 	handleMouseDownOnShip(ev) {
-		const ship = ev.currentTarget;
-		const clone = this.#shipClones[ship.getShipName()];
-		em.emit(Events.UNPLACE_SHIP, ship.getShipName());
-		this.#draggedIdx = Math.round(ev.target.offsetLeft / this.#blockSize);
+		if (!this.#isDragging) {
+			const ship = ev.currentTarget;
+			const clone = this.#shipClones[ship.getShipName()];
+			em.emit(Events.UNPLACE_SHIP, ship.getShipName());
+			this.#draggedIdx = Math.round(ev.target.offsetLeft / this.#blockSize);
 
-		// store original state in case of failure placement we place ship back
-		[this.#ogLoc1, this.#ogLoc2] = ship.getLocation();
-		this.#ogRotation = ship.getRotation();
+			// store original state in case of failure placement we place ship back
+			[this.#ogLoc1, this.#ogLoc2] = ship.getLocation();
+			this.#ogRotation = ship.getRotation();
 
-		ship.style.setProperty('--opacity', '0.3');
-		ship.style.pointerEvents = 'none';
+			ship.style.setProperty('--opacity', '0.3');
+			ship.style.pointerEvents = 'none';
 
-		// set state
-		this.#isDragging = true;
-		this.#draggedClone = clone;
-		this.#draggedShip = ship;
+			// set state
+			this.#isDragging = true;
+			this.#draggedClone = clone;
+			this.#draggedShip = ship;
 
-		this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.width / 2}px`;
-		this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.height / 2}px`;
+			this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.width / 2}px`;
+			this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.height / 2}px`;
 
-		clone.style.display = 'block';
+			clone.style.display = 'block';
+		}
 	}
 
 	handleMouseUp() {
