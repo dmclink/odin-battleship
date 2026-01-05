@@ -31,8 +31,8 @@ class Game {
 	#playerBoards;
 
 	init() {
-		this.#player0Board = new GameBoard();
-		this.#player1Board = new GameBoard();
+		this.#player0Board = new GameBoard(0);
+		this.#player1Board = new GameBoard(1);
 		this.#playerTurn = Players.PLAYER_0;
 		this.#phase = Phases.SETUP;
 		this.#playerBoards = [];
@@ -126,9 +126,9 @@ class Game {
 
 		if (currentPlayerBoard.canPlaceShip(ship, start, end)) {
 			currentPlayerBoard.placeShip(ship, start, end);
-			em.emit(Events.PLACE_SHIP_SUCCESS, shipName, start, end);
+			em.emit(Events.PLACE_SHIP_SUCCESS, shipName, start, end, this.playerTurn());
 		} else {
-			em.emit(Events.PLACE_SHIP_FAIL, shipName, start, end);
+			em.emit(Events.PLACE_SHIP_FAIL, shipName, start, end, this.playerTurn());
 		}
 	}
 
@@ -144,6 +144,7 @@ class Game {
 	}
 
 	bindEvents() {
+		em.on(Events.PLAYER0_READY, this.changeTurn.bind(this));
 		em.on(Events.SELECT_GAME_TYPE, this.setGameType.bind(this));
 		em.on(Events.GAME_OVER, this.unsetGameType.bind(this));
 		em.on(Events.TRY_PLACE_SHIP, this.tryPlaceShip.bind(this));

@@ -8,12 +8,14 @@ class GameBoard {
 	#width;
 	#ships;
 	#board;
+	#player;
 	#hitBoard;
 	#locked;
 
-	constructor() {
+	constructor(player) {
 		this.#height = 10;
 		this.#width = 10;
+		this.#player = player;
 
 		this.#ships = new Map();
 		// TODO: consider getting these sizes and names in constants object and iterating through to set

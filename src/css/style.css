@@ -162,10 +162,6 @@ summary {
 	padding-block: 1rem;
 }
 
-.main {
-	padding: 2rem;
-}
-
 .board-screen {
 	--hinge-size: 4rem;
 	--size: 40rem;
@@ -204,13 +200,6 @@ summary {
 	}
 }
 
-/* FIX: DELETE this */
-main {
-	height: 100vh;
-	display: grid;
-	place-items: center;
-}
-
 .ships {
 	display: grid;
 	transform-style: preserve-3d;
@@ -225,12 +214,28 @@ main {
 	place-items: center;
 }
 
+main {
+	height: 90vh;
+}
+
+game-el {
+	--color-primary: #4468ea;
+	--color-secondary: #203a99;
+	display: grid;
+	justify-items: center;
+}
+
+/* TODO: probably move this to hardcoded on initializations */
 game-board {
 	display: grid;
 	place-items: center;
-	--color-primary: #4468ea;
-	--color-secondary: #203a99;
-	transform: rotateX(-80deg) translateZ(500px);
+	transform: rotateX(-80deg);
+	transform-origin: bottom;
+}
+
+footer {
+	position: fixed;
+	bottom: 0;
 }
 
 .game-screen {

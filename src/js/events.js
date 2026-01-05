@@ -9,6 +9,8 @@ const Events = Object.freeze({
 	TRY_PLACE_SHIP: 'tryPlaceShip',
 	PLACE_SHIP_SUCCESS: 'placeShipSuccess',
 	PLACE_SHIP_FAIL: 'placeShipFail',
+	PLAYER0_READY: 'player0Ready',
+	PLAYER1_READY: 'player1Ready',
 });
 
 export { Events };

@@ -2,23 +2,9 @@ import HitBoard from './hit-board.js';
 import ShipBoard from './ship-board.js';
 import Hinge from './hinge.js';
 
-class GameBoard extends HTMLElement {
-	constructor() {
+export default class GameBoard extends HTMLElement {
+	constructor(blockSize, holeSize, colorPrimary, colorSecondary, player) {
 		super();
-
-		const blockSize = Number(this.getAttribute('block-size'));
-		if (!blockSize) {
-			throw new Error('requires block-size attribute with a number');
-		}
-		const holeSize = Number(this.getAttribute('hole-size'));
-		if (!holeSize) {
-			throw new Error('requires hit-size attribute with a number');
-		}
-
-		const colorPrimary =
-			this.getAttribute('color-primary') || window.getComputedStyle(this).getPropertyValue('--color-primary');
-		const colorSecondary =
-			this.getAttribute('color-secondary') || window.getComputedStyle(this).getPropertyValue('--color-secondary');
 
 		const hingeGap = 5;
 		const hingeCylinders = 3;
@@ -27,21 +13,42 @@ class GameBoard extends HTMLElement {
 		const leftHinge = new Hinge(blockSize * 2, hingeHeight, hingeSides, hingeGap, hingeCylinders, colorPrimary);
 		const rightHinge = new Hinge(blockSize * 2, hingeHeight, hingeSides, hingeGap, hingeCylinders, colorPrimary);
 
-		const shipBoard = new ShipBoard(blockSize, holeSize, colorPrimary, colorSecondary);
+		const shipBoard = new ShipBoard(blockSize, holeSize, colorPrimary, colorSecondary, 10, player);
 		const hitBoard = new HitBoard(blockSize, holeSize, colorPrimary, colorSecondary);
+		this.shipBoard = shipBoard;
+		this.hitBoard = hitBoard;
+		this.leftHinge = leftHinge;
+		this.rightHinge = rightHinge;
+		this.blockSize = blockSize;
 
 		this.append(shipBoard, hitBoard, leftHinge, rightHinge);
 
+		this.style.transformStyle = 'preserve-3d';
+		this.style.transition = 'transform 0.6s ease-out 0.3s';
+	}
+
+	connectedCallback() {
+		// had to push these to connectedCallback since it pulls offsetParent height, on instanciation before appending there is no parent
 		const parentWidth = this.offsetParent.offsetWidth;
 		const parentHeight = this.offsetParent.offsetHeight;
 
-		hitBoard.style.transform = `translateZ(${parentWidth / -2 + blockSize / 2}px) translateY(${parentHeight / 2 - blockSize * 8}px)`;
-		shipBoard.style.transform = `rotateX(90deg) translateZ(${parentHeight / -2 + blockSize / 2}px) translateY(${parentWidth / -2 + blockSize * 8.15}px)`;
+		this.hitBoard.style.transform = `translateZ(${parentWidth / -2 + this.blockSize / 2}px) translateY(${parentHeight / 2 - this.blockSize * 8}px)`;
+		this.shipBoard.style.transform = `rotateX(90deg) translateZ(${parentHeight / -2 + this.blockSize / 2}px) translateY(${parentWidth / -2 + this.blockSize * 8.15}px)`;
 
-		leftHinge.style.transform = `rotateX(90deg) rotateZ(90deg) translateZ(${parentHeight / -2 + blockSize}px) translateX(${parentWidth / -2 + blockSize}px) translateY(${blockSize * 3.5}px)`;
-		rightHinge.style.transform = `rotateX(90deg) rotateZ(90deg) translateZ(${parentHeight / -2 + blockSize}px) translateX(${parentWidth / -2 + blockSize}px) translateY(${blockSize * -3.5}px)`;
+		this.leftHinge.style.transform = `rotateX(90deg) rotateZ(90deg) translateZ(${parentHeight / -2 + this.blockSize}px) translateX(${parentWidth / -2 + this.blockSize}px) translateY(${this.blockSize * 3.5}px)`;
+		this.rightHinge.style.transform = `rotateX(90deg) rotateZ(90deg) translateZ(${parentHeight / -2 + this.blockSize}px) translateX(${parentWidth / -2 + this.blockSize}px) translateY(${this.blockSize * -3.5}px)`;
+	}
 
-		this.style.transformStyle = 'preserve-3d';
+	rotate3D(x, y, z) {
+		this.style.transform = `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg)`;
+	}
+
+	init() {
+		this.shipBoard.init();
+	}
+
+	teardown() {
+		this.shipBoard.teardown();
 	}
 }
 
