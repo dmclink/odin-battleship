@@ -2,6 +2,7 @@ import { Ship } from './ship.js';
 import { Events } from './events.js';
 import { em } from './eventemitter.js';
 import { Loc } from './loc.js';
+import { Ships } from './const.js';
 
 class GameBoard {
 	#height;
@@ -18,12 +19,9 @@ class GameBoard {
 		this.#player = player;
 
 		this.#ships = new Map();
-		// TODO: consider getting these sizes and names in constants object and iterating through to set
-		this.#ships.set('carrier', new Ship(5, 'carrier'));
-		this.#ships.set('battleship', new Ship(4, 'battleship'));
-		this.#ships.set('cruiser', new Ship(3, 'cruiser'));
-		this.#ships.set('submarine', new Ship(3, 'submarine'));
-		this.#ships.set('destroyer', new Ship(2, 'destroyer'));
+		for (const ship of Object.values(Ships)) {
+			this.#ships.set(ship.name, new Ship(ship.size, ship.name));
+		}
 
 		this.#board = [];
 		this.#hitBoard = [];
@@ -92,8 +90,9 @@ class GameBoard {
 	}
 
 	receiveAttack(x, y) {
+		em.emit(Events.RECEIVED_ATTACK);
 		if (!this.#board[y][x]) {
-			em.emit(Events.RECEIVED_ATTACK_MISS, x, y);
+			em.emit(Events.RECEIVED_ATTACK_MISS, x, y, this.#player);
 			return;
 		}
 
@@ -102,15 +101,19 @@ class GameBoard {
 		ship.hit();
 
 		if (this.allShipsSunk()) {
-			em.emit(Events.GAME_OVER, x, y);
+			em.emit(Events.GAME_OVER, x, y, shipName, this.#player);
 			return;
 		}
 
 		if (ship.isSunk()) {
-			em.emit(Events.SHIP_SUNK, x, y, shipName);
+			em.emit(Events.SHIP_SUNK, x, y, shipName, this.#player);
 		} else {
-			em.emit(Events.RECEIVED_ATTACK_HIT, x, y, shipName);
+			em.emit(Events.RECEIVED_ATTACK_HIT, x, y, shipName, this.#player);
 		}
+	}
+
+	canAttack(x, y) {
+		return this.#hitBoard[y][x] === undefined;
 	}
 
 	attack(x, y) {
@@ -127,8 +130,6 @@ class GameBoard {
 		}
 
 		this.#hitBoard[y][x] = true;
-
-		em.emit(Events.ATTACK, x, y);
 	}
 
 	canPlaceShip(ship, start, end) {
@@ -188,9 +189,6 @@ class GameBoard {
 			this.#board[curs.y][curs.x] = ship;
 		}
 		ship.place();
-
-		// TODO: emit all ships placed?
-		// if (ships.placed == this.ships().length)
 	}
 
 	unplaceShip(ship) {
@@ -207,9 +205,6 @@ class GameBoard {
 		}
 
 		ship.unplace();
-
-		// TODO: emit all ships no longer placed?
-		// if (ships.placed == this.ships().length)
 	}
 
 	static cmp(a, b) {
@@ -247,6 +242,7 @@ class GameBoard {
 				return false;
 			}
 		}
+
 		return true;
 	}
 }

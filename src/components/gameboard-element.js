@@ -14,7 +14,7 @@ export default class GameBoard extends HTMLElement {
 		const rightHinge = new Hinge(blockSize * 2, hingeHeight, hingeSides, hingeGap, hingeCylinders, colorPrimary);
 
 		const shipBoard = new ShipBoard(blockSize, holeSize, colorPrimary, colorSecondary, 10, player);
-		const hitBoard = new HitBoard(blockSize, holeSize, colorPrimary, colorSecondary);
+		const hitBoard = new HitBoard(blockSize, holeSize, colorPrimary, colorSecondary, player);
 		this.shipBoard = shipBoard;
 		this.hitBoard = hitBoard;
 		this.leftHinge = leftHinge;
@@ -49,6 +49,24 @@ export default class GameBoard extends HTMLElement {
 
 	teardown() {
 		this.shipBoard.teardown();
+	}
+
+	flipZIndex() {
+		this.style.zIndex *= -1;
+	}
+
+	// x and y are the 0 indexed col and row of cell to lookup
+	// NOTE: cells are 1 indexed, so an input of x = 4, y = 9 should retrieve cell with data-col = 4 data-row = 10
+	getHitCell(x, y) {
+		const cells = Array.from(this.hitBoard.querySelectorAll('.hit-cell'));
+		return cells[y * 10 + x];
+	}
+
+	// x and y are the 0 indexed col and row of cell to lookup
+	// NOTE: cells are 1 indexed, so an input of x = 4, y = 9 should retrieve cell with data-col = 4 data-row = 10
+	getShipCell(x, y) {
+		const cells = Array.from(this.shipBoard.querySelectorAll('.ship-cell'));
+		return cells[y * 10 + x];
 	}
 }
 

@@ -1,15 +1,13 @@
 import { GameBoard } from './gameboard.js';
 import { em } from './eventemitter.js';
 import { Events } from './events.js';
-
-const GameTypes = Object.freeze({
-	PLAYER: 0,
-	COMPUTER: 1,
-});
+import { Loc } from './loc.js';
+import { Ships, GameTypes } from './const.js';
 
 const Players = Object.freeze({
 	PLAYER_0: 0,
 	PLAYER_1: 1,
+	COMPUTER: 1,
 });
 
 const Phases = Object.freeze({
@@ -57,7 +55,7 @@ class Game {
 	/**
 	 * Sets the game type. This function is called when user interacts with the welcome screen to
 	 * start a new game. Calls init() to setup/reset state for the new game
-	 * @param {GameType} gameType - the game type to set the game board to
+	 * @param {GameTypes} gameType - the game type to set the game board to
 	 */
 	setGameType(gameType) {
 		if (this.#gameType !== undefined) {
@@ -92,6 +90,9 @@ class Game {
 
 	currentPlayerBoard() {
 		return this.#playerBoards[this.#playerTurn];
+	}
+	enemyPlayerBoard() {
+		return this.#playerBoards[this.#playerTurn ^ 1];
 	}
 
 	player0Board() {
@@ -143,13 +144,106 @@ class Game {
 		currentPlayerBoard.unplaceShip(ship);
 	}
 
+	static randomMax9() {
+		return Math.floor(Math.random() * 10);
+	}
+
+	static randomLoc() {
+		return new Loc(Game.randomMax9(), Game.randomMax9());
+	}
+
+	static randomDir() {
+		const idx = Math.floor(Math.random() * 4);
+		const dirs = [
+			{ dX: 1, dY: 0 },
+			{ dX: -1, dY: 0 },
+			{ dX: 0, dY: 1 },
+			{ dX: 0, dY: -1 },
+		];
+		return dirs[idx];
+	}
+
+	static randomStartEnd(shipSize) {
+		const dist = shipSize - 1;
+		const { dX, dY } = Game.randomDir();
+		const start = Game.randomLoc();
+		const end = start.moveLoc(dX * dist, dY * dist);
+		return [start, end];
+	}
+
+	randomPlaceShip(ship) {
+		const size = ship.length();
+		let [start, end] = Game.randomStartEnd(size);
+		while (!this.currentPlayerBoard().canPlaceShip(ship, start, end)) {
+			[start, end] = Game.randomStartEnd(size);
+		}
+
+		this.currentPlayerBoard().placeShip(ship, start, end);
+	}
+
+	computerPlaceShips() {
+		if (this.#gameType !== GameTypes.COMPUTER) {
+			return;
+		}
+		if (this.#playerTurn !== Players.PLAYER_1) {
+			throw new Error('called computer place ships on player 0 (human) turn');
+		}
+
+		const board = this.player1Board();
+		for (const shipConst of Object.values(Ships)) {
+			const ship = board.ships().get(shipConst.name);
+			this.randomPlaceShip(ship);
+		}
+
+		em.emit(Events.PLAYER1_READY);
+	}
+
+	attack(attackingPlayer, row, col) {
+		if (attackingPlayer !== this.playerTurn()) {
+			return;
+		}
+
+		const board = this.currentPlayerBoard();
+		const enemyBoard = this.enemyPlayerBoard();
+
+		if (board.canAttack(col, row)) {
+			console.log(`player ${attackingPlayer} attacking at ${row}, ${col}`);
+			board.attack(col, row);
+			enemyBoard.receiveAttack(col, row);
+		}
+	}
+
+	computerAttack() {
+		if (this.gameType() === GameTypes.COMPUTER && this.playerTurn() === Players.COMPUTER) {
+			const board = this.currentPlayerBoard();
+			const enemyBoard = this.enemyPlayerBoard();
+			let attackLoc = Game.randomLoc();
+			while (!board.canAttack(attackLoc.x, attackLoc.y)) {
+				attackLoc = Game.randomLoc();
+			}
+			board.attack(attackLoc.x, attackLoc.y);
+			enemyBoard.receiveAttack(attackLoc.x, attackLoc.y);
+		}
+	}
+
 	bindEvents() {
-		em.on(Events.PLAYER0_READY, this.changeTurn.bind(this));
 		em.on(Events.SELECT_GAME_TYPE, this.setGameType.bind(this));
 		em.on(Events.GAME_OVER, this.unsetGameType.bind(this));
+
 		em.on(Events.TRY_PLACE_SHIP, this.tryPlaceShip.bind(this));
 		em.on(Events.UNPLACE_SHIP, this.unplaceShip.bind(this));
+
+		em.on(Events.PLAYER0_READY, this.changeTurn.bind(this));
+		// TODO: consider moving this and any other gametype specific events to a separate function
+		// called after game type is chosen
+		em.on(Events.PLAYER0_READY, this.computerPlaceShips.bind(this));
+		em.on(Events.PLAYER1_READY, this.changeTurn.bind(this));
+		em.on(Events.PLAYER1_READY, this.nextPhase.bind(this));
+
+		em.on(Events.ATTACK, this.attack.bind(this));
+		em.on(Events.RECEIVED_ATTACK, this.changeTurn.bind(this));
+		em.on(Events.RECEIVED_ATTACK, this.computerAttack.bind(this));
 	}
 }
 
-export { Game, isValidGameType, Phases, GameTypes, Players };
+export { Game, isValidGameType, Phases, Players };

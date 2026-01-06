@@ -2,6 +2,7 @@ import { Game } from './game.js';
 import { DisplayController } from './displaycontroller.js';
 import { em } from './eventemitter.js';
 import { Events } from './events.js';
+import { GameTypes } from './const.js';
 
 document.addEventListener('DOMContentLoaded', (e) => {
 	const g = new Game();
@@ -11,5 +12,5 @@ document.addEventListener('DOMContentLoaded', (e) => {
 	dc.bindEvents();
 
 	// FIX: delete this. just using it to initialize game and not have to click start button
-	em.emit(Events.SELECT_GAME_TYPE, 0);
+	em.emit(Events.SELECT_GAME_TYPE, GameTypes.COMPUTER);
 });

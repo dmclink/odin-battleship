@@ -21,6 +21,7 @@ export default class ShipBoard extends BoardTray {
 	#ogLoc1;
 	#ogLoc2;
 	#player;
+	#offsetDepth;
 
 	constructor(blockSize, holeSize, colorPrimary, colorSecondary, gridSize, player) {
 		super(blockSize, colorPrimary, colorSecondary, gridSize);
@@ -43,12 +44,14 @@ export default class ShipBoard extends BoardTray {
 
 		// adds a little offset to the depth of the pegs so they aren't perfectly aligned with the edge of tray
 		const offsetDepth = blockSize * 0.3;
+		this.#offsetDepth = offsetDepth;
 
 		for (let i = 0; i < numItems; i++) {
 			const cell = document.createElement('div');
 			cell.style.transformStyle = 'preserve-3d';
 			cell.style.height = '100%';
 			cell.style.width = '100%';
+			cell.style.display = 'grid';
 			cell.classList.add('ship-cell');
 			const row = Math.floor(i / 10) + 1;
 			const col = (i % 10) + 1;
@@ -375,6 +378,7 @@ export default class ShipBoard extends BoardTray {
 		em.on(Events.PLACE_SHIP_FAIL, this.restoreShips.bind(this));
 
 		// pick arbitrary starting location on board for ships
+		console.log(this);
 		em.emit(Events.TRY_PLACE_SHIP, 'carrier', new Loc(0, 0), new Loc(4, 0));
 		em.emit(Events.TRY_PLACE_SHIP, 'battleship', new Loc(0, 1), new Loc(3, 1));
 		em.emit(Events.TRY_PLACE_SHIP, 'submarine', new Loc(0, 2), new Loc(2, 2));
@@ -402,6 +406,10 @@ export default class ShipBoard extends BoardTray {
 		Array.from(this.#boardGrid.querySelectorAll('.ship-cell')).forEach((cell) =>
 			cell.addEventListener('mouseenter', this.handleCellDrag.bind(this)),
 		);
+	}
+
+	getOffsetDepth() {
+		return this.#offsetDepth;
 	}
 }
 

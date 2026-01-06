@@ -1,5 +1,6 @@
 const Events = Object.freeze({
 	PHASE_CHANGE: 'phaseChange',
+	RECEIVED_ATTACK: 'receivedAttack',
 	RECEIVED_ATTACK_HIT: 'receivedAttackHit',
 	RECEIVED_ATTACK_MISS: 'receivedAttackMiss',
 	ATTACK: 'attack',
@@ -11,6 +12,8 @@ const Events = Object.freeze({
 	PLACE_SHIP_FAIL: 'placeShipFail',
 	PLAYER0_READY: 'player0Ready',
 	PLAYER1_READY: 'player1Ready',
+	UNPLACE_SHIP: 'unplaceShip',
+	SHIP_SUNK: 'shipSunk',
 });
 
 export { Events };

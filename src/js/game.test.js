@@ -1,8 +1,9 @@
-import { Game, isValidGameType, Players, Phases, GameTypes } from './game.js';
+import { Game, isValidGameType, Players, Phases } from './game.js';
 import { Loc } from './gameboard.js';
 import { jest } from '@jest/globals';
 import { em } from './eventemitter.js';
 import { Events } from './events.js';
+import { GameTypes } from './const.js';
 
 describe('isValidGameType', () => {
 	it('shows valid game types', () => {
