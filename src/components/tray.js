@@ -49,19 +49,25 @@ export default class BoardTray extends HTMLElement {
 				    background-color: #44a7bd9e;
 				}
 			}
+			.tray-container {
+				transform-style: preserve-3d;
+				transform-origin: top;
+			}
           </style>
-		  <div class="tray-rim top"></div>
-		  <div class="middle-row">
-		    <div class="tray-rim left"></div>
-		    <div class="main-container">
-			  <div class="board-grid"></div>
-		      <div class="tray-face front">
-			    <div class="tray-face back"></div>
-			  </div>
+		  <div class="tray-container">
+		    <div class="tray-rim top"></div>
+		    <div class="middle-row">
+		      <div class="tray-rim left"></div>
+		      <div class="main-container">
+		  	  <div class="board-grid"></div>
+		        <div class="tray-face front">
+		  	    <div class="tray-face back"></div>
+		  	  </div>
+		      </div>
+		      <div class="tray-rim right"></div>
 		    </div>
-		    <div class="tray-rim right"></div>
-		  </div>
-		  <div class="tray-rim bottom"></div>
+		    <div class="tray-rim bottom"></div>
+           </div>
         `;
 
 		this.classList.add('tray');

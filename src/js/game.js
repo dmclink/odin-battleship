@@ -2,13 +2,7 @@ import { GameBoard } from './gameboard.js';
 import { em } from './eventemitter.js';
 import { Events } from './events.js';
 import { Loc } from './loc.js';
-import { Ships, GameTypes } from './const.js';
-
-const Players = Object.freeze({
-	PLAYER_0: 0,
-	PLAYER_1: 1,
-	COMPUTER: 1,
-});
+import { Ships, GameTypes, Players } from './const.js';
 
 const Phases = Object.freeze({
 	SETUP: 0,

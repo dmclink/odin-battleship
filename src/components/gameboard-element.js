@@ -5,6 +5,13 @@ import Hinge from './hinge.js';
 export default class GameBoard extends HTMLElement {
 	constructor(blockSize, holeSize, colorPrimary, colorSecondary, player) {
 		super();
+		this.style.display = 'grid';
+		this.style.placeItems = 'center';
+		this.style.transformOrigin = 'bottom';
+		this.style.transformStyle = 'preserve-3d';
+		this.style.transition = 'transform 0.6s ease-out 0.3s';
+		this.style.position = 'absolute';
+		this.style.placeSelf = 'center';
 
 		const hingeGap = 5;
 		const hingeCylinders = 3;
@@ -22,9 +29,7 @@ export default class GameBoard extends HTMLElement {
 		this.blockSize = blockSize;
 
 		this.append(shipBoard, hitBoard, leftHinge, rightHinge);
-
-		this.style.transformStyle = 'preserve-3d';
-		this.style.transition = 'transform 0.6s ease-out 0.3s';
+		shipBoard.style.transform = 'rotateZ(10deg)';
 	}
 
 	connectedCallback() {

@@ -136,6 +136,7 @@ summary {
 
 .body {
 	min-height: 100vh;
+	background-color: whitesmoke;
 }
 
 .welcome-screen {
@@ -144,6 +145,28 @@ summary {
 	font-family: commandocommando;
 	min-height: 100vh;
 	text-align: center;
+}
+
+.winner-dialog {
+	background-color: whitesmoke;
+	border: 2px solid black;
+	font-family: commandocommando;
+	font-size: 2rem;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	padding: 2rem;
+
+	& p {
+		text-align: center;
+	}
+
+	& .play-again-btn {
+		display: block;
+		margin: 0 auto;
+		padding-inline: 1rem;
+	}
 }
 
 .welcome-title {
@@ -155,11 +178,15 @@ summary {
 	margin-bottom: 2rem;
 }
 
-.welcome-player-mode {
+.button {
 	margin: 0 auto;
 	font-size: 2rem;
 	min-width: 5.5rem;
 	padding-block: 1rem;
+	background-color: whitesmoke;
+	&:hover {
+		filter: brightness(0.9);
+	}
 }
 
 .board-screen {
@@ -216,6 +243,8 @@ summary {
 
 main {
 	height: 90vh;
+	display: grid;
+	place-items: center;
 }
 
 game-el {
@@ -223,14 +252,6 @@ game-el {
 	--color-secondary: #203a99;
 	display: grid;
 	justify-items: center;
-}
-
-/* TODO: probably move this to hardcoded on initializations */
-game-board {
-	display: grid;
-	place-items: center;
-	transform: rotateX(-80deg);
-	transform-origin: bottom;
 }
 
 footer {

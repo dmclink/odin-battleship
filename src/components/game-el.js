@@ -5,27 +5,37 @@ export default class Game extends HTMLElement {
 	#blockSize;
 	#holeSize;
 
-	constructor() {
+	constructor(blockSizeIn, holeSizeIn, colorPrimaryIn, colorSecondaryIn) {
 		super();
 		this.id = 'game';
 
-		const blockSize = Number(this.getAttribute('block-size'));
+		this.style.transformStyle = 'preserve-3d';
+		this.style.position = 'relative';
+		this.style.transition = 'transform 0.6s ease-out 0.3s';
+		this.style.height = '100%';
+
+		const blockSize = blockSizeIn || Number(this.getAttribute('block-size'));
 		if (!blockSize) {
 			throw new Error('requires block-size attribute with a number');
 		}
-		const holeSize = Number(this.getAttribute('hole-size'));
+		const holeSize = holeSizeIn || Number(this.getAttribute('hole-size'));
 		if (!holeSize) {
 			throw new Error('requires hit-size attribute with a number');
 		}
-		this.style.height = `${blockSize * 12}px`;
 
 		this.#holeSize = holeSize;
 		this.#blockSize = blockSize;
 
 		const colorPrimary =
-			this.getAttribute('color-primary') || window.getComputedStyle(this).getPropertyValue('--color-primary');
+			colorPrimaryIn ||
+			this.getAttribute('color-primary') ||
+			window.getComputedStyle(this).getPropertyValue('--color-primary');
 		const colorSecondary =
-			this.getAttribute('color-secondary') || window.getComputedStyle(this).getPropertyValue('--color-secondary');
+			colorSecondaryIn ||
+			this.getAttribute('color-secondary') ||
+			window.getComputedStyle(this).getPropertyValue('--color-secondary');
+		this.colorPrimary = colorPrimary;
+		this.colorSecondary = colorSecondary;
 
 		const screen = new GameScreen();
 		screen.id = 'game-screen';
@@ -48,6 +58,12 @@ export default class Game extends HTMLElement {
 	}
 	getHoleSize() {
 		return this.#holeSize;
+	}
+	getColors() {
+		return [this.colorPrimary, this.colorSecondary];
+	}
+	rotate3D(x, y, z) {
+		this.style.transform = `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg)`;
 	}
 }
 

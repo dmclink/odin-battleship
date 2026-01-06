@@ -1,7 +1,8 @@
 import { Events } from './events.js';
 import { em } from './eventemitter.js';
-import { GameTypes } from './const.js';
+import { GameTypes, Players } from './const.js';
 
+import GameEl from '../components/game-el.js';
 import { MissPeg } from '../components/miss-peg.js';
 import { HitPeg } from '../components/hit-peg.js';
 
@@ -10,12 +11,17 @@ class DisplayController {
 	#playerBoards;
 	#holeSize;
 	#blockSize;
+	#toastContainer;
 
 	constructor() {
 		this.welcomeScreen = document.querySelector('#welcome-screen');
 		this.player0board = document.getElementById('player0-board');
 		this.player1board = document.getElementById('player1-board');
-		this.player1board.style.display = 'none';
+		this.#toastContainer = document.getElementById('toast-container');
+
+		// start player1 board hidden
+		this.player1board.style.zIndex = '-1';
+		this.player1board.rotate3D(0, 180, 0);
 
 		this.#playerBoards = [this.player0board, this.player1board];
 
@@ -25,6 +31,8 @@ class DisplayController {
 
 		this.#holeSize = this.game.getHoleSize();
 		this.#blockSize = this.game.getBlockSize();
+
+		// this.game.rotate3D(-80, 0, 0);
 	}
 
 	bindPlayerModeButtons() {
@@ -68,8 +76,10 @@ class DisplayController {
 
 	// rotates the boards so you can see the hitboard side, player1board is reversed behind player0board
 	rotateBoards() {
-		this.player0board.rotate3D(-30, 0, 0);
-		this.player1board.rotate3D(-30, 180, 0);
+		// this.player0board.rotate3D(-30, 0, 0);
+		// this.player1board.rotate3D(-30, 180, 0);
+		//
+		this.game.rotate3D(-30, 0, 0);
 	}
 
 	addPegToAttackingPlayerHitBoard(x, y, player, hitOrMiss) {
@@ -94,7 +104,6 @@ class DisplayController {
 		const board = this.#playerBoards[player];
 		const cell = board.getShipCell(x, y);
 
-		console.log('blockSize:', this.#blockSize);
 		let peg;
 		if (hitOrMiss === 'hit') {
 			peg = new HitPeg(this.#blockSize, this.#holeSize, false);
@@ -137,17 +146,47 @@ class DisplayController {
 		}
 	}
 
+	playerString(player) {
+		if (this.#gameType === GameTypes.COMPUTER) {
+			return player === Players.COMPUTER ? 'The computer' : 'The player';
+		}
+
+		return `Player ${player + 1}`;
+	}
+
+	announceMiss(x, y, player) {
+		this.#toastContainer.addToast(`${this.playerString(player ^ 1)} missed...`, 600);
+		const dialog = document.getElementById('winner-dialog');
+		dialog.querySelector('#winner-span').innerText = `${this.playerString(player ^ 1)}`;
+		dialog.showModal();
+	}
+
+	announceHit(x, y, shipName, player) {
+		this.#toastContainer.addToast(`${this.playerString(player ^ 1)} hit a ${shipName}`, 1500);
+	}
+
 	announceSunkShip(x, y, shipName, player) {
-		console.log(`player ${player}'s ${shipName} was sunk!`);
+		this.#toastContainer.addToast(`${this.playerString(player)}'s ${shipName} was sunk!`, 2000);
 	}
 
 	announceGameOver(x, y, shipName, player) {
-		console.log(`player ${player ^ 1} wins the game!`);
+		const dialog = document.getElementById('winner-dialog');
+		dialog.querySelector('#winner-span').innerText = `${this.playerString(player ^ 1)}`;
+		dialog.showModal();
+	}
+
+	bindPlayAgainButton() {
+		document.getElementById('play-again-btn').addEventListener('click', (ev) => {
+			console.log('makin new game');
+			const [colorPrimary, colorSecondary] = this.game.getColors();
+			this.game.replaceWith(new GameEl(this.#blockSize, this.#holeSize, colorPrimary, colorSecondary));
+		});
 	}
 
 	bindEvents() {
 		this.bindPlayerModeButtons();
 		this.bindStartGameButton();
+		this.bindPlayAgainButton();
 
 		em.on(Events.GAME_START, this.setGameType.bind(this));
 		em.on(Events.GAME_START, this.hideWelcomeScreen.bind(this));
@@ -157,7 +196,7 @@ class DisplayController {
 		em.on(Events.PHASE_CHANGE, this.rotateBoards.bind(this));
 		em.on(Events.PHASE_CHANGE, this.bindHitBoardEvents.bind(this));
 
-		// TODO: add events for received attack and attack to send pegs into holes
+		// this group of functions generates the pegs and sends them into holes
 		// params - x, y, player representing col and row, these are 0 indexed, and the player
 		// that received the attack
 		em.on(Events.RECEIVED_ATTACK_MISS, this.handleReceivedAttackMiss.bind(this));
@@ -165,6 +204,9 @@ class DisplayController {
 		em.on(Events.SHIP_SUNK, this.handleReceivedAttackHit.bind(this));
 		em.on(Events.GAME_OVER, this.handleReceivedAttackHit.bind(this));
 
+		// this group of functions generates the toasts to announce events hit/miss/sunk
+		em.on(Events.RECEIVED_ATTACK_MISS, this.announceMiss.bind(this));
+		em.on(Events.RECEIVED_ATTACK_HIT, this.announceHit.bind(this));
 		em.on(Events.SHIP_SUNK, this.announceSunkShip.bind(this));
 		em.on(Events.GAME_OVER, this.announceGameOver.bind(this));
 	}

@@ -6,9 +6,15 @@ const Ships = Object.freeze({
 	DESTROYER: { name: 'destroyer', size: 2 },
 });
 
+const Players = Object.freeze({
+	PLAYER_0: 0,
+	PLAYER_1: 1,
+	COMPUTER: 1,
+});
+
 const GameTypes = Object.freeze({
 	PLAYER: 0,
 	COMPUTER: 1,
 });
 
-export { Ships, GameTypes };
+export { Ships, GameTypes, Players };

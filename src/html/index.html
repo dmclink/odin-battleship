@@ -10,6 +10,8 @@
     <script type="module" src="../components/rotate-3d.js" defer></script>
     <script type="module" src="../components/gameboard-element.js" defer></script>
     <script type="module" src="../components/game-el.js" defer></script>
+    <script type="module" src="../components/toast-container.js" defer></script>
+
     <!-- <script type="module" src="../components/cylinder.js" defer></script> -->
     <!-- <script type="module" src="../components/hinge.js" defer></script> -->
     <!-- <script type="module" src="../components/cube.js" defer></script> -->
@@ -23,18 +25,26 @@
       <div class="welcome-text">
         <h1 class="welcome-title">BATTLESHIP</h1>
         <div class="welcome-btn-grp">
-          <button class="welcome-player-mode" id="welcome-1-player-mode">P1</button>
-          <button class="welcome-player-mode" id="welcome-2-player-mode">P2</button>
+          <button class="button welcome-player-mode" id="welcome-1-player-mode">P1</button>
+          <button class="button welcome-player-mode" id="welcome-2-player-mode">P2</button>
         </div>
         <p>Select number of players to start</p>
       </div>
     </div>
+
     <!-- FIX: add class hidden  -->
     <main class="main" id="main">
-      <game-el block-size="40" , hole-size="10"></game-el>
+      <game-el id="game" block-size="40" , hole-size="10"></game-el>
+
+      <toast-container id="toast-container"></toast-container>
+
+      <dialog id="winner-dialog" class="winner-dialog">
+        <p><span id="winner-span"></span> wins the game!</p>
+        <button id="play-again-btn" class="button play-again-btn">Play Again</button>
+      </dialog>
     </main>
     <footer>
-      <button class="player0-ready-btn" id="player0-ready-btn">Ready</button>
+      <button class="button player0-ready-btn" id="player0-ready-btn">Ready</button>
     </footer>
   </body>
 </html>
