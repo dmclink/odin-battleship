@@ -68,25 +68,8 @@ class DisplayController {
 
 	// rotates the boards so you can see the hitboard side, player1board is reversed behind player0board
 	rotateBoards() {
-		this.player0board.rotate3D(-40, 20, 0);
-		this.player1board.rotate3D(-10, 180, 0);
-	}
-
-	addWhitePegToAttackingPlayerHitBoard(x, y, player) {
-		const board = this.#playerBoards[player];
-		const cell = board.getHitCell(x, y);
-
-		const peg = new MissPeg(this.#blockSize, this.#holeSize);
-		cell.appendChild(peg);
-	}
-
-	addWhitePegToReceivedPlayerShipBoard(x, y, player) {
-		const board = this.#playerBoards[player];
-		const cell = board.getShipCell(x, y);
-
-		const peg = new MissPeg(this.#blockSize, this.#holeSize, false);
-		peg.style.transform = `translateZ(${-board.shipBoard.getOffsetDepth() / 2}px)`;
-		cell.appendChild(peg);
+		this.player0board.rotate3D(-30, 0, 0);
+		this.player1board.rotate3D(-30, 180, 0);
 	}
 
 	addPegToAttackingPlayerHitBoard(x, y, player, hitOrMiss) {
@@ -95,12 +78,14 @@ class DisplayController {
 
 		let peg;
 		if (hitOrMiss === 'hit') {
-			peg = new HitPeg(this.#blockSize, this.#holeSize, false);
+			peg = new HitPeg(this.#blockSize, this.#holeSize);
 		} else if (hitOrMiss === 'miss') {
-			peg = new MissPeg(this.#blockSize, this.#holeSize, false);
+			peg = new MissPeg(this.#blockSize, this.#holeSize);
 		} else {
 			throw new Error('got event that was not hit or miss:', hitOrMiss);
 		}
+
+		peg.animate([{ transform: 'translateZ(999px)' }, { transform: 'translateZ(0)' }], 200);
 
 		cell.appendChild(peg);
 	}
@@ -109,13 +94,25 @@ class DisplayController {
 		const board = this.#playerBoards[player];
 		const cell = board.getShipCell(x, y);
 
+		console.log('blockSize:', this.#blockSize);
 		let peg;
 		if (hitOrMiss === 'hit') {
 			peg = new HitPeg(this.#blockSize, this.#holeSize, false);
 			peg.style.transform = `translateZ(${this.#blockSize / 2}px)`;
+			peg.animate(
+				[{ transform: 'translateZ(999px)' }, { transform: `translateZ(${this.#blockSize / 2}px)` }],
+				200,
+			);
 		} else if (hitOrMiss === 'miss') {
 			peg = new MissPeg(this.#blockSize, this.#holeSize, false);
 			peg.style.transform = `translateZ(${-board.shipBoard.getOffsetDepth() / 2}px)`;
+			peg.animate(
+				[
+					{ transform: 'translateZ(999px)' },
+					{ transform: `translateZ(${-board.shipBoard.getOffsetDepth() / 2}px)` },
+				],
+				200,
+			);
 		} else {
 			throw new Error('got event that was not hit or miss:', hitOrMiss);
 		}
@@ -124,8 +121,8 @@ class DisplayController {
 	}
 
 	handleReceivedAttackMiss(x, y, playerThatReceivedAttack) {
-		this.addWhitePegToAttackingPlayerHitBoard(x, y, playerThatReceivedAttack ^ 1);
-		this.addWhitePegToReceivedPlayerShipBoard(x, y, playerThatReceivedAttack);
+		this.addPegToAttackingPlayerHitBoard(x, y, playerThatReceivedAttack ^ 1, 'miss');
+		this.addPegToReceivedPlayerShipBoard(x, y, playerThatReceivedAttack, 'miss');
 	}
 
 	handleReceivedAttackHit(x, y, hitShip, playerThatReceivedAttack) {
