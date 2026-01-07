@@ -11,6 +11,7 @@
     <script type="module" src="../components/gameboard-element.js" defer></script>
     <script type="module" src="../components/game-el.js" defer></script>
     <script type="module" src="../components/toast-container.js" defer></script>
+    <script type="module" src="../components/game-screen.js" defer></script>
 
     <!-- <script type="module" src="../components/cylinder.js" defer></script> -->
     <!-- <script type="module" src="../components/hinge.js" defer></script> -->
@@ -21,7 +22,7 @@
   </head>
   <body class="body">
     <!-- FIX: remove class hidden  -->
-    <div class="welcome-screen hidden" , id="welcome-screen">
+    <div class="welcome-screen" id="welcome-screen">
       <div class="welcome-text">
         <h1 class="welcome-title">BATTLESHIP</h1>
         <div class="welcome-btn-grp">
@@ -33,7 +34,8 @@
     </div>
 
     <!-- FIX: add class hidden  -->
-    <main class="main" id="main">
+    <main class="main hidden" id="main">
+      <game-screen class="game-screen" id="game-screen"></game-screen>
       <game-el id="game" block-size="40" , hole-size="10"></game-el>
 
       <toast-container id="toast-container"></toast-container>
@@ -44,7 +46,14 @@
       </dialog>
     </main>
     <footer>
-      <button class="button player0-ready-btn" id="player0-ready-btn">Ready</button>
+      <div id="setup-controls" class="btn-controls dnone">
+        <button class="button dnone player0-ready-btn" id="player0-ready-btn">Ready</button>
+        <button class="button dnone player1-ready-btn" id="player1-ready-btn">Ready</button>
+      </div>
+      <div id="play-controls" class="btn-controls dnone">
+        <button class="button end-turn-btn" id="end-turn-btn">End Turn</button>
+        <button class="button next-ready-btn" id="next-ready-btn">Next Player Ready</button>
+      </div>
     </footer>
   </body>
 </html>

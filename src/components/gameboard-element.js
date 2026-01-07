@@ -7,9 +7,9 @@ export default class GameBoard extends HTMLElement {
 		super();
 		this.style.display = 'grid';
 		this.style.placeItems = 'center';
-		this.style.transformOrigin = 'bottom';
+		this.style.transformOrigin = `center ${-blockSize * 12}px`;
 		this.style.transformStyle = 'preserve-3d';
-		this.style.transition = 'transform 0.6s ease-out 0.3s';
+		this.style.transition = 'transform 0.6s ease-out 0.3s, opacity 0.6s ease-out 0.3s';
 		this.style.position = 'absolute';
 		this.style.placeSelf = 'center';
 
@@ -46,6 +46,11 @@ export default class GameBoard extends HTMLElement {
 
 	rotate3D(x, y, z) {
 		this.style.transform = `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg)`;
+	}
+
+	blinkOut() {
+		this.style.transform = 'scale(0) rotateX(180deg)';
+		this.style.opacity = '0';
 	}
 
 	init() {

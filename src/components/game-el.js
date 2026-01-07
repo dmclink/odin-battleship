@@ -9,11 +9,6 @@ export default class Game extends HTMLElement {
 		super();
 		this.id = 'game';
 
-		this.style.transformStyle = 'preserve-3d';
-		this.style.position = 'relative';
-		this.style.transition = 'transform 0.6s ease-out 0.3s';
-		this.style.height = '100%';
-
 		const blockSize = blockSizeIn || Number(this.getAttribute('block-size'));
 		if (!blockSize) {
 			throw new Error('requires block-size attribute with a number');
@@ -26,6 +21,10 @@ export default class Game extends HTMLElement {
 		this.#holeSize = holeSize;
 		this.#blockSize = blockSize;
 
+		this.style.transformStyle = 'preserve-3d';
+		this.style.position = 'relative';
+		this.style.transform = `translateY(${blockSize * 3}px)`;
+
 		const colorPrimary =
 			colorPrimaryIn ||
 			this.getAttribute('color-primary') ||
@@ -36,12 +35,6 @@ export default class Game extends HTMLElement {
 			window.getComputedStyle(this).getPropertyValue('--color-secondary');
 		this.colorPrimary = colorPrimary;
 		this.colorSecondary = colorSecondary;
-
-		const screen = new GameScreen();
-		screen.id = 'game-screen';
-		screen.classList.add('game-screen');
-
-		this.appendChild(screen);
 
 		const player0Board = new GameBoard(blockSize, holeSize, colorPrimary, colorSecondary, 0);
 		const player1Board = new GameBoard(blockSize, holeSize, colorPrimary, colorSecondary, 1);

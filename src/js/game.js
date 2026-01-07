@@ -201,7 +201,6 @@ class Game {
 		const enemyBoard = this.enemyPlayerBoard();
 
 		if (board.canAttack(col, row)) {
-			console.log(`player ${attackingPlayer} attacking at ${row}, ${col}`);
 			board.attack(col, row);
 			enemyBoard.receiveAttack(col, row);
 		}
@@ -209,14 +208,17 @@ class Game {
 
 	computerAttack() {
 		if (this.gameType() === GameTypes.COMPUTER && this.playerTurn() === Players.COMPUTER) {
-			const board = this.currentPlayerBoard();
-			const enemyBoard = this.enemyPlayerBoard();
-			let attackLoc = Game.randomLoc();
-			while (!board.canAttack(attackLoc.x, attackLoc.y)) {
-				attackLoc = Game.randomLoc();
-			}
-			board.attack(attackLoc.x, attackLoc.y);
-			enemyBoard.receiveAttack(attackLoc.x, attackLoc.y);
+			// timeout gives it a more realistic "feel" like the computer had to think for a split second
+			setTimeout(() => {
+				const board = this.currentPlayerBoard();
+				const enemyBoard = this.enemyPlayerBoard();
+				let attackLoc = Game.randomLoc();
+				while (!board.canAttack(attackLoc.x, attackLoc.y)) {
+					attackLoc = Game.randomLoc();
+				}
+				board.attack(attackLoc.x, attackLoc.y);
+				enemyBoard.receiveAttack(attackLoc.x, attackLoc.y);
+			}, 300);
 		}
 	}
 

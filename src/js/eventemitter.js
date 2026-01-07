@@ -16,6 +16,10 @@ class EventEmitter {
 		}
 	}
 
+	offAll() {
+		this.events = {};
+	}
+
 	emit(eventName, ...data) {
 		if (this.events[eventName]) {
 			this.events[eventName].forEach((callback) => {

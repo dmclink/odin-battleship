@@ -52,6 +52,10 @@ export default class BoardTray extends HTMLElement {
 			.tray-container {
 				transform-style: preserve-3d;
 				transform-origin: top;
+			    pointer-events: none;
+				& * {
+					pointer-events: auto;
+				}
 			}
           </style>
 		  <div class="tray-container">

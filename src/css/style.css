@@ -277,5 +277,11 @@ footer {
 }
 
 .hidden {
+	/* display: none; */
+	position: absolute;
+	left: -99999px;
+}
+
+.dnone {
 	display: none;
 }

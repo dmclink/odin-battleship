@@ -30,14 +30,13 @@ export default class ShipBoard extends BoardTray {
 		this.#holeSize = holeSize;
 		this.#player = player;
 
-		this.querySelector('.tray-container').style.transform = 'rotateX(-20deg)';
+		// this.querySelector('.tray-container').style.transform = 'rotateX(-20deg)';
 
 		const trayFaceFront = this.querySelector('.tray-face.front');
 		const boardGrid = this.querySelector('.board-grid');
 		this.#boardGrid = boardGrid;
 		this.#gameScreen = document.querySelector('.game-screen');
 		boardGrid.id = `ship-grid${this.#player}`;
-		console.log({ boardGrid });
 
 		const rowLength = gridSize || 10;
 		const numItems = rowLength * rowLength;

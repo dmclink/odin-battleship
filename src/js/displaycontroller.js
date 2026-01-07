@@ -12,27 +12,32 @@ class DisplayController {
 	#holeSize;
 	#blockSize;
 	#toastContainer;
+	#playControls;
+	#setupControls;
 
 	constructor() {
 		this.welcomeScreen = document.querySelector('#welcome-screen');
 		this.player0board = document.getElementById('player0-board');
 		this.player1board = document.getElementById('player1-board');
 		this.#toastContainer = document.getElementById('toast-container');
-
-		// start player1 board hidden
-		this.player1board.style.zIndex = '-1';
-		this.player1board.rotate3D(0, 180, 0);
+		this.#playControls = document.getElementById('play-controls');
+		this.#setupControls = document.getElementById('setup-controls');
 
 		this.#playerBoards = [this.player0board, this.player1board];
 
 		this.game = document.getElementById('game');
-		this.main = document.querySelector('#main');
-		this.playerModeBtns = Array.from(document.querySelectorAll('.welcome-player-mode'));
-
 		this.#holeSize = this.game.getHoleSize();
 		this.#blockSize = this.game.getBlockSize();
 
-		// this.game.rotate3D(-80, 0, 0);
+		this.main = document.querySelector('#main');
+		this.playerModeBtns = Array.from(document.querySelectorAll('.welcome-player-mode'));
+
+		// start player1 board hidden
+		this.player1board.blinkOut();
+		this.player1board.style.zIndex = '-1';
+
+		this.welcomeScreen.classList.remove('hidden');
+		this.main.classList.add('hidden');
 	}
 
 	bindPlayerModeButtons() {
@@ -42,6 +47,7 @@ class DisplayController {
 		for (let i = 0; i < this.playerModeBtns.length; i++) {
 			const button = this.playerModeBtns[i];
 			button.addEventListener('click', () => {
+				console.log('startnig game type:', i, GameTypes.COMPUTER);
 				em.emit(Events.SELECT_GAME_TYPE, i);
 			});
 		}
@@ -76,10 +82,12 @@ class DisplayController {
 
 	// rotates the boards so you can see the hitboard side, player1board is reversed behind player0board
 	rotateBoards() {
-		// this.player0board.rotate3D(-30, 0, 0);
-		// this.player1board.rotate3D(-30, 180, 0);
-		//
-		this.game.rotate3D(-30, 0, 0);
+		this.player0board.rotate3D(-20, 0, 0);
+		this.player1board.rotate3D(-20, 0, 0);
+	}
+
+	rotateForShipPlacement() {
+		this.player0board.rotate3D(-60, 0, 0);
 	}
 
 	addPegToAttackingPlayerHitBoard(x, y, player, hitOrMiss) {
@@ -156,9 +164,11 @@ class DisplayController {
 
 	announceMiss(x, y, player) {
 		this.#toastContainer.addToast(`${this.playerString(player ^ 1)} missed...`, 600);
-		const dialog = document.getElementById('winner-dialog');
-		dialog.querySelector('#winner-span').innerText = `${this.playerString(player ^ 1)}`;
-		dialog.showModal();
+
+		// TODO: remove this, it's for debugging to skip straight to restart
+		// const dialog = document.getElementById('winner-dialog');
+		// dialog.querySelector('#winner-span').innerText = `${this.playerString(player ^ 1)}`;
+		// dialog.showModal();
 	}
 
 	announceHit(x, y, shipName, player) {
@@ -175,11 +185,29 @@ class DisplayController {
 		dialog.showModal();
 	}
 
+	initButtons() {
+		this.#setupControls.classList.add('dnone');
+		this.#playControls.classList.add('dnone');
+	}
+
+	showSetupButtons() {
+		this.#setupControls.classList.remove('dnone');
+		this.#setupControls.querySelector('#player0-ready-btn').classList.remove('dnone');
+	}
+
 	bindPlayAgainButton() {
-		document.getElementById('play-again-btn').addEventListener('click', (ev) => {
-			console.log('makin new game');
+		document.getElementById('play-again-btn').addEventListener('click', () => {
+			// TODO: need to reset controls in footer
+			// thinking to make a few sets of controls that i can display none for the different phases
+			// setup phase play phase and welcome screen phase (has nothing)
+			// play phase against computer also has nothing
+			// play phase against human has ready buttons that need to be bound to create a handoff
+			// can hide the inactive player .board-grid or #ship-grid$ (player number 0 or 1)
+			const dialog = document.getElementById('winner-dialog');
+			dialog.close();
 			const [colorPrimary, colorSecondary] = this.game.getColors();
 			this.game.replaceWith(new GameEl(this.#blockSize, this.#holeSize, colorPrimary, colorSecondary));
+			em.emit(Events.RESTART_GAME);
 		});
 	}
 
@@ -190,7 +218,9 @@ class DisplayController {
 
 		em.on(Events.GAME_START, this.setGameType.bind(this));
 		em.on(Events.GAME_START, this.hideWelcomeScreen.bind(this));
+		em.on(Events.GAME_START, this.rotateForShipPlacement.bind(this));
 		em.on(Events.GAME_START, this.initPlayer0.bind(this));
+		em.on(Events.GAME_START, this.showSetupButtons.bind(this));
 		em.on(Events.PLAYER0_READY, this.initPlayer1.bind(this));
 
 		em.on(Events.PHASE_CHANGE, this.rotateBoards.bind(this));

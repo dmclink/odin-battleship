@@ -13,8 +13,8 @@ const Players = Object.freeze({
 });
 
 const GameTypes = Object.freeze({
-	PLAYER: 0,
-	COMPUTER: 1,
+	COMPUTER: 0,
+	PLAYER: 1,
 });
 
 export { Ships, GameTypes, Players };
