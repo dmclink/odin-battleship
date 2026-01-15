@@ -257,6 +257,16 @@ game-el {
 footer {
 	position: fixed;
 	bottom: 0;
+	width: 100%;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	justify-items: center;
+}
+
+/* hack to keep footer height from collapsing when all buttons disappear */
+.buffer-btn {
+	border: none;
+	visibility: hidden;
 }
 
 .board {
@@ -280,6 +290,23 @@ footer {
 	/* display: none; */
 	position: absolute;
 	left: -99999px;
+}
+
+.volume-controls {
+	display: flex;
+	justify-content: start;
+	align-items: end;
+	width: 100%;
+	margin-left: 2rem;
+}
+
+.volume-controls svg {
+	height: 3rem;
+}
+
+.volume-btn {
+	position: relative;
+	cursor: pointer;
 }
 
 .dnone {

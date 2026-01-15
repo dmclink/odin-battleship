@@ -14,6 +14,10 @@ class DisplayController {
 	#toastContainer;
 	#playControls;
 	#setupControls;
+	#volumeControls;
+	#volumeOnBtn;
+	#volumeOffBtn;
+	#volumeOn;
 
 	constructor() {
 		this.welcomeScreen = document.querySelector('#welcome-screen');
@@ -22,6 +26,10 @@ class DisplayController {
 		this.#toastContainer = document.getElementById('toast-container');
 		this.#playControls = document.getElementById('play-controls');
 		this.#setupControls = document.getElementById('setup-controls');
+		this.#volumeControls = document.getElementById('volume-controls');
+		this.#volumeOnBtn = document.getElementById('volume-on-btn');
+		this.#volumeOffBtn = document.getElementById('volume-off-btn');
+		this.#volumeOn = true;
 
 		this.#playerBoards = [this.player0board, this.player1board];
 
@@ -191,8 +199,23 @@ class DisplayController {
 	}
 
 	showSetupButtons() {
+		const player0ready = this.#setupControls.querySelector('#player0-ready-btn');
+		player0ready.innerText = this.#gameType === GameTypes.COMPUTER ? 'Ready' : 'Player 1 Ready';
+
+		player0ready.classList.remove('dnone');
 		this.#setupControls.classList.remove('dnone');
-		this.#setupControls.querySelector('#player0-ready-btn').classList.remove('dnone');
+	}
+
+	hideSetupButtons() {
+		this.#setupControls.classList.add('dnone');
+	}
+
+	showVolumeControls() {
+		this.#volumeControls.classList.remove('dnone');
+	}
+
+	hideVolumeControls() {
+		this.#volumeControls.classList.add('dnone');
 	}
 
 	bindPlayAgainButton() {
@@ -211,7 +234,41 @@ class DisplayController {
 		});
 	}
 
+	playSplashAudio() {
+		if (this.#volumeOn) {
+			const audio = new Audio('../assets/water-splash-199583.mp3');
+			audio.play();
+		}
+	}
+
+	playHitAudio() {
+		if (this.#volumeOn) {
+			const audio = new Audio('../assets/missile-explosion.mp3');
+			audio.play();
+		}
+	}
+
+	toggleVolume() {
+		this.#volumeOn = !this.#volumeOn;
+		if (this.#volumeOn) {
+			this.#volumeOnBtn.classList.remove('dnone');
+			this.#volumeOffBtn.classList.add('dnone');
+		} else {
+			this.#volumeOnBtn.classList.add('dnone');
+			this.#volumeOffBtn.classList.remove('dnone');
+		}
+	}
+
+	bindVolumeButtons() {
+		this.#volumeControls.addEventListener('click', () => {
+			this.toggleVolume();
+		});
+	}
+
+	// TODO: build functions to mute and unmute and add and remove displaynone from volume buttons
+
 	bindEvents() {
+		this.bindVolumeButtons();
 		this.bindPlayerModeButtons();
 		this.bindStartGameButton();
 		this.bindPlayAgainButton();
@@ -225,6 +282,7 @@ class DisplayController {
 
 		em.on(Events.PHASE_CHANGE, this.rotateBoards.bind(this));
 		em.on(Events.PHASE_CHANGE, this.bindHitBoardEvents.bind(this));
+		em.on(Events.PHASE_CHANGE, this.hideSetupButtons.bind(this));
 
 		// this group of functions generates the pegs and sends them into holes
 		// params - x, y, player representing col and row, these are 0 indexed, and the player
@@ -233,6 +291,11 @@ class DisplayController {
 		em.on(Events.RECEIVED_ATTACK_HIT, this.handleReceivedAttackHit.bind(this));
 		em.on(Events.SHIP_SUNK, this.handleReceivedAttackHit.bind(this));
 		em.on(Events.GAME_OVER, this.handleReceivedAttackHit.bind(this));
+
+		em.on(Events.GAME_START, this.showVolumeControls.bind(this));
+		em.on(Events.RECEIVED_ATTACK_MISS, this.playSplashAudio.bind(this));
+		em.on(Events.RECEIVED_ATTACK_HIT, this.playHitAudio.bind(this));
+		em.on(Events.GAME_OVER, this.showHideControls.bind(this));
 
 		// this group of functions generates the toasts to announce events hit/miss/sunk
 		em.on(Events.RECEIVED_ATTACK_MISS, this.announceMiss.bind(this));
