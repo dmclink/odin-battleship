@@ -214,8 +214,9 @@ class DisplayController {
 	}
 
 	bindHitBoardEvents() {
-		if (this.#gameType === GameTypes.COMPUTER) {
-			this.bindPlayer0HitBoardEvents();
+		this.bindPlayer0HitBoardEvents();
+		if (this.#gameType === GameTypes.PLAYER) {
+			this.bindPlayer1HitBoardEvents();
 		}
 	}
 
@@ -278,13 +279,13 @@ class DisplayController {
 			this.announcePassDevice(Players.PLAYER_1);
 			this.player0board.rotateForHitBoardNeg180();
 			this.player1board.rotateForHitBoard();
-			this.unbindPlayer1HitBoardEvents();
+			// this.unbindPlayer1HitBoardEvents();
 		} else {
 			this.player0board.hideShips();
 			this.announcePassDevice(Players.PLAYER_0);
 			this.player0board.rotateForHitBoard();
 			this.player1board.rotateForHitBoard180();
-			this.unbindPlayer0HitBoardEvents();
+			// this.unbindPlayer0HitBoardEvents();
 		}
 
 		this.updatePlayerButtonName(this.#currentPlayer);
@@ -347,12 +348,6 @@ class DisplayController {
 
 	bindPlayAgainButton() {
 		document.getElementById('play-again-btn').addEventListener('click', () => {
-			// TODO: need to reset controls in footer
-			// thinking to make a few sets of controls that i can display none for the different phases
-			// setup phase play phase and welcome screen phase (has nothing)
-			// play phase against computer also has nothing
-			// play phase against human has ready buttons that need to be bound to create a handoff
-			// can hide the inactive player .board-grid or #ship-grid$ (player number 0 or 1)
 			const dialog = document.getElementById('winner-dialog');
 			dialog.close();
 			const [colorPrimary, colorSecondary] = this.game.getColors();
@@ -396,6 +391,13 @@ class DisplayController {
 		this.#currentPlayer = player;
 	}
 
+	hideControls() {
+		this.#setupControls.classList.add('dnone');
+		this.#setupControls.querySelector('#player0-ready-btn').classList.add('dnone');
+		this.#setupControls.querySelector('#player1-ready-btn').classList.add('dnone');
+		this.#playControls.classList.add('dnone');
+	}
+
 	bindEvents() {
 		this.bindVolumeButtons();
 		this.bindPlayerModeButtons();
@@ -430,8 +432,7 @@ class DisplayController {
 		em.on(Events.GAME_START, this.showVolumeControls.bind(this));
 		em.on(Events.RECEIVED_ATTACK_MISS, this.playSplashAudio.bind(this));
 		em.on(Events.RECEIVED_ATTACK_HIT, this.playHitAudio.bind(this));
-		// TODO: what is this function supposed to be?
-		// em.on(Events.GAME_OVER, this.showHideControls.bind(this));
+		em.on(Events.GAME_OVER, this.hideControls.bind(this));
 
 		// TOAST: this group of functions generates the toasts to announce events hit/miss/sunk
 		em.on(Events.RECEIVED_ATTACK_MISS, this.announceMiss.bind(this));
