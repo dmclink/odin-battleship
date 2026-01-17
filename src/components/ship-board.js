@@ -401,7 +401,7 @@ export default class ShipBoard extends BoardTray {
 		for (const ship of Object.values(this.#ships)) {
 			ship.removeEventListener('mousedown', this.boundHandleMouseDownOnShip);
 			ship.removeEventListener('touchstart', this.boundHandleMouseDownOnShip);
-			ship.removeEventListener('dbclick', this.boundHandleDoubleClick);
+			ship.removeEventListener('touchstart', this.boundHandleDoubleClick);
 		}
 
 		// mouseup on document because clones have no pointer events for passthrough on hover
