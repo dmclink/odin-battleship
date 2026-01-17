@@ -358,14 +358,14 @@ class DisplayController {
 
 	playSplashAudio() {
 		if (this.#volumeOn) {
-			const audio = new Audio('../assets/water-splash-199583.mp3');
+			const audio = new Audio('./src/assets/water-splash-199583.mp3');
 			audio.play();
 		}
 	}
 
 	playHitAudio() {
 		if (this.#volumeOn) {
-			const audio = new Audio('../assets/missile-explosion.mp3');
+			const audio = new Audio('./src/assets/missile-explosion.mp3');
 			audio.play();
 		}
 	}
