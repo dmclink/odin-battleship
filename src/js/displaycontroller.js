@@ -305,13 +305,13 @@ class DisplayController {
 		const endTurnBtn = this.#playControls.querySelector('#end-turn-btn');
 		const showShipsBtn = this.#playControls.querySelector('#show-ships-btn');
 
-		showShipsBtn.addEventListener('mousedown', () => {
+		showShipsBtn.addEventListener('pointerdown', () => {
 			this.handleShowShipsMouseDown();
 		});
-		showShipsBtn.addEventListener('mouseup', () => {
+		showShipsBtn.addEventListener('pointerup', () => {
 			this.handleShowShipsMouseUp();
 		});
-		showShipsBtn.addEventListener('mouseleave', () => {
+		showShipsBtn.addEventListener('pointerleave', () => {
 			this.handleShowShipsMouseUp();
 		});
 
