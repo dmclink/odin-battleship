@@ -114,12 +114,12 @@ class DisplayController {
 
 	rotateForHitBoards() {
 		this.player0board.rotateForHitBoard();
-		this.player1board.rotateForReversedHitBoard();
+		this.player1board.rotateForHitBoard180();
 	}
 
 	rotateReverseHitBoards() {
-		this.player0board.rotateForReversedHitBoard();
-		this.player1board.rotateForHitBoard();
+		// this.player0board.rotateForReversedHitBoard();
+		// this.player1board.rotateForHitBoard();
 	}
 
 	phaseChange() {
@@ -275,13 +275,18 @@ class DisplayController {
 	handlePlayerEndTurnClick() {
 		if (this.#currentPlayer === Players.PLAYER_1) {
 			this.player1board.hideShips();
-			this.rotateReverseHitBoards();
+			this.announcePassDevice(Players.PLAYER_1);
+			this.player0board.rotateForHitBoardNeg180();
+			this.player1board.rotateForHitBoard();
 			this.unbindPlayer1HitBoardEvents();
 		} else {
 			this.player0board.hideShips();
-			this.rotateForHitBoards();
+			this.announcePassDevice(Players.PLAYER_0);
+			this.player0board.rotateForHitBoard();
+			this.player1board.rotateForHitBoard180();
 			this.unbindPlayer0HitBoardEvents();
 		}
+
 		this.updatePlayerButtonName(this.#currentPlayer);
 	}
 
@@ -416,7 +421,6 @@ class DisplayController {
 		// that received the attack
 		em.on(Events.RECEIVED_ATTACK, this.updateCurrentPlayer.bind(this));
 		em.on(Events.RECEIVED_ATTACK, this.enableEndTurnBtn.bind(this));
-		em.on(Events.RECEIVED_ATTACK, this.announcePassDevice.bind(this));
 		em.on(Events.RECEIVED_ATTACK_MISS, this.handleReceivedAttackMiss.bind(this));
 		em.on(Events.RECEIVED_ATTACK_HIT, this.handleReceivedAttackHit.bind(this));
 		em.on(Events.SHIP_SUNK, this.handleReceivedAttackHit.bind(this));

@@ -57,7 +57,11 @@ export default class GameBoard extends HTMLElement {
 		this.rotate3D(-20, 0, 0);
 	}
 
-	rotateForReversedHitBoard() {
+	rotateForHitBoardNeg180() {
+		this.rotate3D(-20, -180, 0);
+	}
+
+	rotateForHitBoard180() {
 		this.rotate3D(-20, 180, 0);
 	}
 
