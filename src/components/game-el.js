@@ -1,4 +1,3 @@
-import GameScreen from './game-screen.js';
 import GameBoard from './gameboard-element.js';
 
 export default class Game extends HTMLElement {
