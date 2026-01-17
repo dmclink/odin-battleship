@@ -1,6 +1,6 @@
 import { Events } from './events.js';
 import { em } from './eventemitter.js';
-import { GameTypes, Players } from './const.js';
+import { GameTypes, Players, rotateDelay, rotateTransition } from './const.js';
 
 import GameEl from '../components/game-el.js';
 import { MissPeg } from '../components/miss-peg.js';
@@ -18,6 +18,7 @@ class DisplayController {
 	#volumeOnBtn;
 	#volumeOffBtn;
 	#volumeOn;
+	#currentPlayer;
 
 	constructor() {
 		this.welcomeScreen = document.querySelector('#welcome-screen');
@@ -41,8 +42,8 @@ class DisplayController {
 		this.playerModeBtns = Array.from(document.querySelectorAll('.welcome-player-mode'));
 
 		// start player1 board hidden
-		this.player1board.blinkOut();
-		this.player1board.style.zIndex = '-1';
+		this.player1board.rotateOutShipPlacement();
+		this.player1board.classList.add('hidden');
 
 		this.welcomeScreen.classList.remove('hidden');
 		this.main.classList.add('hidden');
@@ -55,7 +56,6 @@ class DisplayController {
 		for (let i = 0; i < this.playerModeBtns.length; i++) {
 			const button = this.playerModeBtns[i];
 			button.addEventListener('click', () => {
-				console.log('startnig game type:', i, GameTypes.COMPUTER);
 				em.emit(Events.SELECT_GAME_TYPE, i);
 			});
 		}
@@ -64,13 +64,28 @@ class DisplayController {
 	hideWelcomeScreen() {
 		this.welcomeScreen.classList.add('hidden');
 		this.main.classList.remove('hidden');
+		if (this.#gameType === GameTypes.PLAYER) {
+			this.player1board.classList.remove('hidden');
+		}
 	}
 
+	// TODO: need to bind player1-ready-btn
 	bindStartGameButton() {
 		document.getElementById('player0-ready-btn').addEventListener('click', (ev) => {
-			ev.target.disabled = true;
+			ev.target.classList.add('dnone');
 			this.player0board.teardown();
 			em.emit(Events.PLAYER0_READY);
+			// TODO: need to change phase? switch to player2 depending on game type
+			if (this.#gameType === GameTypes.PLAYER) {
+				document.getElementById('player1-ready-btn').classList.remove('dnone');
+			}
+		});
+
+		document.getElementById('player1-ready-btn').addEventListener('click', (ev) => {
+			ev.target.disabled = true;
+			this.player1board.teardown();
+			em.emit(Events.PLAYER1_READY);
+			// TODO: need to change phase? switch to player2 depending on game type
 		});
 	}
 
@@ -79,8 +94,17 @@ class DisplayController {
 	}
 
 	initPlayer1() {
-		if (this.#gameType !== GameTypes.COMPUTER) {
+		if (this.#gameType === GameTypes.PLAYER) {
+			this.player0board.hideShips();
+			this.player0board.rotateOutShipPlacement();
 			this.player1board.init();
+			this.player1board.rotateInShipPlacement();
+		}
+	}
+
+	start2PlayerGame() {
+		if (this.gameType === GameTypes.PLAYER) {
+			this.player1board.hideShips();
 		}
 	}
 
@@ -88,12 +112,30 @@ class DisplayController {
 		this.#gameType = gameType;
 	}
 
-	// rotates the boards so you can see the hitboard side, player1board is reversed behind player0board
-	rotateBoards() {
-		this.player0board.rotate3D(-20, 0, 0);
-		this.player1board.rotate3D(-20, 0, 0);
+	rotateForHitBoards() {
+		this.player0board.rotateForHitBoard();
+		this.player1board.rotateForReversedHitBoard();
 	}
 
+	rotateReverseHitBoards() {
+		this.player0board.rotateForReversedHitBoard();
+		this.player1board.rotateForHitBoard();
+	}
+
+	phaseChange() {
+		if (this.GameType === GameTypes.COMPUTER) {
+			this.player0board.rotate3D(-20, 0, 0);
+		} else {
+			this.announcePassDevice(Players.PLAYER_0);
+			this.updateCurrentPlayer(Players.PLAYER_0);
+			this.player0board.rotateForShipPlacement();
+			this.player1board.rotateOutShipPlacement();
+			setTimeout(this.rotateForHitBoards.bind(this), rotateDelay + rotateTransition);
+		}
+	}
+
+	// TODO: need to rotate player1board i tried rotating but dont see it even if deleting player0
+	// is it not on screen?
 	rotateForShipPlacement() {
 		this.player0board.rotate3D(-60, 0, 0);
 	}
@@ -155,10 +197,25 @@ class DisplayController {
 		this.addPegToReceivedPlayerShipBoard(x, y, playerThatReceivedAttack, 'hit');
 	}
 
-	bindHitBoardEvents() {
+	bindPlayer0HitBoardEvents() {
 		this.player0board.querySelector('.hit-board').bindEvents();
-		if (this.#gameType === GameTypes.PLAYER) {
-			this.player1board.querySelector('.hit-board').bindEvents();
+	}
+
+	bindPlayer1HitBoardEvents() {
+		this.player1board.querySelector('.hit-board').bindEvents();
+	}
+
+	unbindPlayer0HitBoardEvents() {
+		this.player0board.querySelector('.hit-board').unbindEvents();
+	}
+
+	unbindPlayer1HitBoardEvents() {
+		this.player1board.querySelector('.hit-board').unbindEvents();
+	}
+
+	bindHitBoardEvents() {
+		if (this.#gameType === GameTypes.COMPUTER) {
+			this.bindPlayer0HitBoardEvents();
 		}
 	}
 
@@ -170,13 +227,14 @@ class DisplayController {
 		return `Player ${player + 1}`;
 	}
 
+	announcePassDevice(player) {
+		if (this.#gameType === GameTypes.PLAYER) {
+			this.#toastContainer.addToast(`Pass device back to ${this.playerString(player)}`, 5000);
+		}
+	}
+
 	announceMiss(x, y, player) {
 		this.#toastContainer.addToast(`${this.playerString(player ^ 1)} missed...`, 600);
-
-		// TODO: remove this, it's for debugging to skip straight to restart
-		// const dialog = document.getElementById('winner-dialog');
-		// dialog.querySelector('#winner-span').innerText = `${this.playerString(player ^ 1)}`;
-		// dialog.showModal();
 	}
 
 	announceHit(x, y, shipName, player) {
@@ -208,6 +266,70 @@ class DisplayController {
 
 	hideSetupButtons() {
 		this.#setupControls.classList.add('dnone');
+	}
+
+	updatePlayerButtonName(player) {
+		this.#playControls.querySelector('#next-ready-btn').innerText = `${this.playerString(player)} Ready`;
+	}
+
+	handlePlayerEndTurnClick() {
+		if (this.#currentPlayer === Players.PLAYER_1) {
+			this.player1board.hideShips();
+			this.rotateReverseHitBoards();
+			this.unbindPlayer1HitBoardEvents();
+		} else {
+			this.player0board.hideShips();
+			this.rotateForHitBoards();
+			this.unbindPlayer0HitBoardEvents();
+		}
+		this.updatePlayerButtonName(this.#currentPlayer);
+	}
+
+	handlePlayerReadyClick() {
+		if (this.#currentPlayer === Players.PLAYER_0) {
+			this.bindPlayer0HitBoardEvents();
+			this.player0board.showShips();
+		} else {
+			this.bindPlayer1HitBoardEvents();
+			this.player1board.showShips();
+		}
+	}
+
+	bindPlayControlsButtons() {
+		const endTurnBtn = this.#playControls.querySelector('#end-turn-btn');
+		const nextReadyBtn = this.#playControls.querySelector('#next-ready-btn');
+
+		nextReadyBtn.addEventListener('click', (ev) => {
+			nextReadyBtn.disabled = true;
+			this.handlePlayerReadyClick();
+		});
+
+		endTurnBtn.addEventListener('click', (ev) => {
+			endTurnBtn.disabled = true;
+			this.handlePlayerEndTurnClick();
+			nextReadyBtn.disabled = false;
+		});
+	}
+
+	disableEndTurnBtn() {
+		this.#playControls.querySelector('#end-turn-btn').disabled = true;
+	}
+
+	enableEndTurnBtn() {
+		this.#playControls.querySelector('#end-turn-btn').disabled = false;
+	}
+
+	disablePlayerReadyBtn() {
+		this.#playControls.querySelector('#next-ready-btn').disabled = true;
+		this.#playControls.querySelector('#end-turn-btn').disabled = false;
+	}
+
+	showPlayerButtons() {
+		if (this.#gameType === GameTypes.PLAYER) {
+			this.disableEndTurnBtn();
+			this.updatePlayerButtonName(Players.PLAYER_0);
+			this.#playControls.classList.remove('dnone');
+		}
 	}
 
 	showVolumeControls() {
@@ -265,13 +387,16 @@ class DisplayController {
 		});
 	}
 
-	// TODO: build functions to mute and unmute and add and remove displaynone from volume buttons
+	updateCurrentPlayer(player) {
+		this.#currentPlayer = player;
+	}
 
 	bindEvents() {
 		this.bindVolumeButtons();
 		this.bindPlayerModeButtons();
 		this.bindStartGameButton();
 		this.bindPlayAgainButton();
+		this.bindPlayControlsButtons();
 
 		em.on(Events.GAME_START, this.setGameType.bind(this));
 		em.on(Events.GAME_START, this.hideWelcomeScreen.bind(this));
@@ -279,25 +404,32 @@ class DisplayController {
 		em.on(Events.GAME_START, this.initPlayer0.bind(this));
 		em.on(Events.GAME_START, this.showSetupButtons.bind(this));
 		em.on(Events.PLAYER0_READY, this.initPlayer1.bind(this));
+		em.on(Events.PLAYER1_READY, this.start2PlayerGame.bind(this));
 
-		em.on(Events.PHASE_CHANGE, this.rotateBoards.bind(this));
+		em.on(Events.PHASE_CHANGE, this.phaseChange.bind(this));
 		em.on(Events.PHASE_CHANGE, this.bindHitBoardEvents.bind(this));
 		em.on(Events.PHASE_CHANGE, this.hideSetupButtons.bind(this));
+		em.on(Events.PHASE_CHANGE, this.showPlayerButtons.bind(this));
 
 		// this group of functions generates the pegs and sends them into holes
 		// params - x, y, player representing col and row, these are 0 indexed, and the player
 		// that received the attack
+		em.on(Events.RECEIVED_ATTACK, this.updateCurrentPlayer.bind(this));
+		em.on(Events.RECEIVED_ATTACK, this.enableEndTurnBtn.bind(this));
+		em.on(Events.RECEIVED_ATTACK, this.announcePassDevice.bind(this));
 		em.on(Events.RECEIVED_ATTACK_MISS, this.handleReceivedAttackMiss.bind(this));
 		em.on(Events.RECEIVED_ATTACK_HIT, this.handleReceivedAttackHit.bind(this));
 		em.on(Events.SHIP_SUNK, this.handleReceivedAttackHit.bind(this));
 		em.on(Events.GAME_OVER, this.handleReceivedAttackHit.bind(this));
 
+		// AUDIO: this group of functions generates audio and controls
 		em.on(Events.GAME_START, this.showVolumeControls.bind(this));
 		em.on(Events.RECEIVED_ATTACK_MISS, this.playSplashAudio.bind(this));
 		em.on(Events.RECEIVED_ATTACK_HIT, this.playHitAudio.bind(this));
-		em.on(Events.GAME_OVER, this.showHideControls.bind(this));
+		// TODO: what is this function supposed to be?
+		// em.on(Events.GAME_OVER, this.showHideControls.bind(this));
 
-		// this group of functions generates the toasts to announce events hit/miss/sunk
+		// TOAST: this group of functions generates the toasts to announce events hit/miss/sunk
 		em.on(Events.RECEIVED_ATTACK_MISS, this.announceMiss.bind(this));
 		em.on(Events.RECEIVED_ATTACK_HIT, this.announceHit.bind(this));
 		em.on(Events.SHIP_SUNK, this.announceSunkShip.bind(this));

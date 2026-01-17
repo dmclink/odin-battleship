@@ -184,8 +184,11 @@ summary {
 	min-width: 5.5rem;
 	padding-block: 1rem;
 	background-color: whitesmoke;
-	&:hover {
+	&:hover:not([disabled]) {
 		filter: brightness(0.9);
+	}
+	&[disabled] {
+		cursor: default;
 	}
 }
 

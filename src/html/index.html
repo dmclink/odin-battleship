@@ -21,7 +21,6 @@
     <!-- <script type="module" src="../components/ship-builder.js" defer></script> -->
   </head>
   <body class="body">
-    <!-- FIX: remove class hidden  -->
     <div class="welcome-screen" id="welcome-screen">
       <div class="welcome-text">
         <h1 class="welcome-title">BATTLESHIP</h1>
@@ -33,7 +32,6 @@
       </div>
     </div>
 
-    <!-- FIX: add class hidden  -->
     <main class="main hidden" id="main">
       <game-screen class="game-screen" id="game-screen"></game-screen>
       <game-el id="game" block-size="40" , hole-size="10"></game-el>
@@ -92,11 +90,11 @@
       <div class="controls">
         <div id="setup-controls" class="btn-controls dnone">
           <button class="button dnone player0-ready-btn" id="player0-ready-btn">Ready</button>
-          <button class="button dnone player1-ready-btn" id="player1-ready-btn">Ready</button>
+          <button class="button dnone player1-ready-btn" id="player1-ready-btn">Player 2 Ready</button>
         </div>
         <div id="play-controls" class="btn-controls dnone">
-          <button class="button end-turn-btn" id="end-turn-btn">End Turn</button>
           <button class="button next-ready-btn" id="next-ready-btn">Next Player Ready</button>
+          <button class="button end-turn-btn" id="end-turn-btn">End Turn</button>
         </div>
       </div>
 

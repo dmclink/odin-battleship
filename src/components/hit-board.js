@@ -40,17 +40,30 @@ export default class HitBoard extends BoardTray {
 
 			trayFace.appendChild(cube);
 		}
+
+		this.cellClick = this.handleCellClick.bind(this);
+	}
+
+	handleCellClick(ev) {
+		const cell = ev.target;
+		const row = cell.getAttribute('data-row');
+		const col = cell.getAttribute('data-col');
+		em.emit(Events.ATTACK, this.#player, row - 1, col - 1);
 	}
 
 	bindEvents() {
 		const trayFace = this.querySelector('.tray-face.front');
 
 		Array.from(trayFace.querySelectorAll('.hit-cell')).forEach((cell) => {
-			cell.addEventListener('click', () => {
-				const row = cell.getAttribute('data-row');
-				const col = cell.getAttribute('data-col');
-				em.emit(Events.ATTACK, this.#player, row - 1, col - 1);
-			});
+			cell.addEventListener('click', this.cellClick);
+		});
+	}
+
+	unbindEvents() {
+		const trayFace = this.querySelector('.tray-face.front');
+
+		Array.from(trayFace.querySelectorAll('.hit-cell')).forEach((cell) => {
+			cell.removeEventListener('click', this.cellClick);
 		});
 	}
 }

@@ -17,4 +17,7 @@ const GameTypes = Object.freeze({
 	PLAYER: 1,
 });
 
-export { Ships, GameTypes, Players };
+const rotateDelay = 300;
+const rotateTransition = 600;
+
+export { Ships, GameTypes, Players, rotateDelay, rotateTransition };

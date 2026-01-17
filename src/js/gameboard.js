@@ -90,7 +90,7 @@ class GameBoard {
 	}
 
 	receiveAttack(x, y) {
-		em.emit(Events.RECEIVED_ATTACK);
+		em.emit(Events.RECEIVED_ATTACK, this.#player);
 		if (!this.#board[y][x]) {
 			em.emit(Events.RECEIVED_ATTACK_MISS, x, y, this.#player);
 			return;

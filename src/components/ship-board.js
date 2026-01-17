@@ -318,6 +318,14 @@ export default class ShipBoard extends BoardTray {
 		this.#boardGrid.querySelector(`.ship-cell:nth-child(${nthChild})`).classList.add('drop-zone');
 	}
 
+	ships() {
+		const result = [];
+		for (const ship of Object.values(this.#ships)) {
+			result.push(ship);
+		}
+		return result;
+	}
+
 	updateShipLocation(shipName, start, end, player) {
 		if (player !== this.#player) {
 			return;

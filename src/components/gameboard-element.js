@@ -1,6 +1,7 @@
 import HitBoard from './hit-board.js';
 import ShipBoard from './ship-board.js';
 import Hinge from './hinge.js';
+import { rotateDelay, rotateTransition } from '../js/const.js';
 
 export default class GameBoard extends HTMLElement {
 	constructor(blockSize, holeSize, colorPrimary, colorSecondary, player) {
@@ -9,7 +10,7 @@ export default class GameBoard extends HTMLElement {
 		this.style.placeItems = 'center';
 		this.style.transformOrigin = `center ${-blockSize * 12}px`;
 		this.style.transformStyle = 'preserve-3d';
-		this.style.transition = 'transform 0.6s ease-out 0.3s, opacity 0.6s ease-out 0.3s';
+		this.style.transition = `transform ${rotateTransition / 1000}s ease-out ${rotateDelay / 1000}s, opacity ${rotateTransition / 1000}s ease-out ${rotateDelay / 1000}s, z-index ${rotateTransition / 1000}s ease-out ${rotateDelay / 1000}s`;
 		this.style.position = 'absolute';
 		this.style.placeSelf = 'center';
 
@@ -48,9 +49,54 @@ export default class GameBoard extends HTMLElement {
 		this.style.transform = `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg)`;
 	}
 
+	rotateForShipPlacement() {
+		this.rotate3D(-60, 0, 0);
+	}
+
+	rotateForHitBoard() {
+		this.rotate3D(-20, 0, 0);
+	}
+
+	rotateForReversedHitBoard() {
+		this.rotate3D(-20, 180, 0);
+	}
+
+	rotateOutShipPlacement() {
+		this.rotate3D(-60, 180, 0);
+		this.zIndex = '-1';
+	}
+
+	rotateInShipPlacement() {
+		this.rotate3D(-60, 360, 0);
+		this.zIndex = '-1';
+	}
+
+	ships() {
+		return this.shipBoard.ships();
+	}
+
+	hideShips() {
+		this.ships().forEach((ship) => {
+			ship.classList.add('dnone');
+		});
+	}
+
+	showShips() {
+		this.ships().forEach((ship) => {
+			ship.classList.remove('dnone');
+		});
+	}
+
 	blinkOut() {
-		this.style.transform = 'scale(0) rotateX(180deg)';
-		this.style.opacity = '0';
+		this.style.zIndex = '-1';
+		this.style.transform = 'scale(0) rotateY(-180deg)';
+		// this.style.opacity = '0';
+	}
+
+	blinkIn() {
+		this.style.zIndex = '1';
+		this.style.transform = 'scale(1) rotateY(0deg)';
+		// this.style.opacity = '1';
 	}
 
 	init() {
