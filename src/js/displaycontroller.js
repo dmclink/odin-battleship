@@ -69,13 +69,11 @@ class DisplayController {
 		}
 	}
 
-	// TODO: need to bind player1-ready-btn
 	bindStartGameButton() {
 		document.getElementById('player0-ready-btn').addEventListener('click', (ev) => {
 			ev.target.classList.add('dnone');
 			this.player0board.teardown();
 			em.emit(Events.PLAYER0_READY);
-			// TODO: need to change phase? switch to player2 depending on game type
 			if (this.#gameType === GameTypes.PLAYER) {
 				document.getElementById('player1-ready-btn').classList.remove('dnone');
 			}
@@ -85,7 +83,6 @@ class DisplayController {
 			ev.target.disabled = true;
 			this.player1board.teardown();
 			em.emit(Events.PLAYER1_READY);
-			// TODO: need to change phase? switch to player2 depending on game type
 		});
 	}
 
@@ -103,7 +100,7 @@ class DisplayController {
 	}
 
 	start2PlayerGame() {
-		if (this.gameType === GameTypes.PLAYER) {
+		if (this.#gameType === GameTypes.PLAYER) {
 			this.player1board.hideShips();
 		}
 	}
@@ -115,11 +112,6 @@ class DisplayController {
 	rotateForHitBoards() {
 		this.player0board.rotateForHitBoard();
 		this.player1board.rotateForHitBoard180();
-	}
-
-	rotateReverseHitBoards() {
-		// this.player0board.rotateForReversedHitBoard();
-		// this.player1board.rotateForHitBoard();
 	}
 
 	phaseChange() {
@@ -134,8 +126,6 @@ class DisplayController {
 		}
 	}
 
-	// TODO: need to rotate player1board i tried rotating but dont see it even if deleting player0
-	// is it not on screen?
 	rotateForShipPlacement() {
 		this.player0board.rotate3D(-60, 0, 0);
 	}
@@ -270,7 +260,7 @@ class DisplayController {
 	}
 
 	updatePlayerButtonName(player) {
-		this.#playControls.querySelector('#next-ready-btn').innerText = `${this.playerString(player)} Ready`;
+		this.#playControls.querySelector('#current-player-label').innerText = `${this.playerString(player)}'s Turn:`;
 	}
 
 	handlePlayerEndTurnClick() {
@@ -291,29 +281,44 @@ class DisplayController {
 		this.updatePlayerButtonName(this.#currentPlayer);
 	}
 
-	handlePlayerReadyClick() {
+	handleShowShipsMouseDown() {
 		if (this.#currentPlayer === Players.PLAYER_0) {
-			this.bindPlayer0HitBoardEvents();
 			this.player0board.showShips();
 		} else {
-			this.bindPlayer1HitBoardEvents();
 			this.player1board.showShips();
 		}
+	}
+	handleShowShipsMouseUp() {
+		if (this.#currentPlayer === Players.PLAYER_0) {
+			this.player0board.hideShips();
+		} else {
+			this.player1board.hideShips();
+		}
+	}
+
+	disableShowShipsBtn() {
+		const showShipsBtn = this.#playControls.querySelector('#show-ships-btn');
+		showShipsBtn.disabled = true;
 	}
 
 	bindPlayControlsButtons() {
 		const endTurnBtn = this.#playControls.querySelector('#end-turn-btn');
-		const nextReadyBtn = this.#playControls.querySelector('#next-ready-btn');
+		const showShipsBtn = this.#playControls.querySelector('#show-ships-btn');
 
-		nextReadyBtn.addEventListener('click', (ev) => {
-			nextReadyBtn.disabled = true;
-			this.handlePlayerReadyClick();
+		showShipsBtn.addEventListener('mousedown', () => {
+			this.handleShowShipsMouseDown();
+		});
+		showShipsBtn.addEventListener('mouseup', () => {
+			this.handleShowShipsMouseUp();
+		});
+		showShipsBtn.addEventListener('mouseleave', () => {
+			this.handleShowShipsMouseUp();
 		});
 
-		endTurnBtn.addEventListener('click', (ev) => {
+		endTurnBtn.addEventListener('click', () => {
 			endTurnBtn.disabled = true;
 			this.handlePlayerEndTurnClick();
-			nextReadyBtn.disabled = false;
+			showShipsBtn.disabled = false;
 		});
 	}
 
@@ -322,11 +327,6 @@ class DisplayController {
 	}
 
 	enableEndTurnBtn() {
-		this.#playControls.querySelector('#end-turn-btn').disabled = false;
-	}
-
-	disablePlayerReadyBtn() {
-		this.#playControls.querySelector('#next-ready-btn').disabled = true;
 		this.#playControls.querySelector('#end-turn-btn').disabled = false;
 	}
 
@@ -423,6 +423,7 @@ class DisplayController {
 		// that received the attack
 		em.on(Events.RECEIVED_ATTACK, this.updateCurrentPlayer.bind(this));
 		em.on(Events.RECEIVED_ATTACK, this.enableEndTurnBtn.bind(this));
+		em.on(Events.RECEIVED_ATTACK, this.disableShowShipsBtn.bind(this));
 		em.on(Events.RECEIVED_ATTACK_MISS, this.handleReceivedAttackMiss.bind(this));
 		em.on(Events.RECEIVED_ATTACK_HIT, this.handleReceivedAttackHit.bind(this));
 		em.on(Events.SHIP_SUNK, this.handleReceivedAttackHit.bind(this));
