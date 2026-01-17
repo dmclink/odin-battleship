@@ -363,6 +363,10 @@ export default class ShipBoard extends BoardTray {
 		this.renderDropZone();
 	}
 
+	handleDoubleClick() {
+		this.#draggedClone.rotateCW();
+	}
+
 	teardown() {
 		for (const clone of Object.values(this.#shipClones)) {
 			this.#gameScreen.removeChild(clone);
@@ -371,6 +375,7 @@ export default class ShipBoard extends BoardTray {
 		for (const ship of Object.values(this.#ships)) {
 			ship.removeEventListener('mousedown', this.boundHandleMouseDownOnShip);
 			ship.removeEventListener('touchstart', this.boundHandleMouseDownOnShip);
+			ship.removeEventListener('dbclick', this.boundHandleDoubleClick);
 		}
 
 		// mouseup on document because clones have no pointer events for passthrough on hover
@@ -401,9 +406,11 @@ export default class ShipBoard extends BoardTray {
 		// html dragging API isn't working for passing data back and forth and firing events properly
 		// so we implement bespoke drag with mousedown mouseup etc
 		this.boundHandleMouseDownOnShip = this.handleMouseDownOnShip.bind(this);
+		this.boundHandleDoubleClick = this.handleDoubleClick.bind(this);
 		for (const ship of Object.values(this.#ships)) {
 			ship.addEventListener('mousedown', this.boundHandleMouseDownOnShip);
 			ship.addEventListener('touchstart', this.boundHandleMouseDownOnShip);
+			ship.addEventListener('dbclick', this.boundHandleDoubleClick);
 		}
 
 		// mouseup on document because clones have no pointer events for passthrough on hover

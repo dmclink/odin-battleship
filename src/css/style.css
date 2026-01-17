@@ -134,6 +134,11 @@ summary {
 	font-style: normal;
 }
 
+html,
+body {
+	overscroll-behavior: none;
+}
+
 .body {
 	min-height: 100vh;
 	background-color: whitesmoke;
