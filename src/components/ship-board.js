@@ -369,17 +369,22 @@ export default class ShipBoard extends BoardTray {
 		}
 
 		for (const ship of Object.values(this.#ships)) {
-			ship.removeEventListener('pointerdown', this.boundHandleMouseDownOnShip);
+			ship.removeEventListener('mousedown', this.boundHandleMouseDownOnShip);
+			ship.removeEventListener('touchstart', this.boundHandleMouseDownOnShip);
 		}
 
 		// mouseup on document because clones have no pointer events for passthrough on hover
 		// this is the drop event
-		document.removeEventListener('pointerup', this.boundHandleMouseUp);
+		document.removeEventListener('mouseup', this.boundHandleMouseUp);
+		document.removeEventListener('touchend', this.boundHandleMouseUp);
 		document.removeEventListener('pointermove', this.boundPointerMove);
+		document.removeEventListener('touchmove', this.boundPointerMove);
 		document.removeEventListener('keypress', this.boundHandleKeyPress);
-		Array.from(this.#boardGrid.querySelectorAll('.ship-cell')).forEach((cell) =>
-			cell.removeEventListener('pointerenter', this.handleCellDrag),
-		);
+		Array.from(this.#boardGrid.querySelectorAll('.ship-cell')).forEach((cell) => {
+			cell.removeEventListener('mouseenter', this.handleCellDrag);
+			cell.removeEventListener('touchenter', this.handleCellDrag);
+			cell.removeEventListener('pointerenter', this.handleCellDrag);
+		});
 	}
 
 	bindEvents() {
@@ -397,23 +402,28 @@ export default class ShipBoard extends BoardTray {
 		// so we implement bespoke drag with mousedown mouseup etc
 		this.boundHandleMouseDownOnShip = this.handleMouseDownOnShip.bind(this);
 		for (const ship of Object.values(this.#ships)) {
-			ship.addEventListener('pointerdown', this.boundHandleMouseDownOnShip);
+			ship.addEventListener('mousedown', this.boundHandleMouseDownOnShip);
+			ship.addEventListener('touchstart', this.boundHandleMouseDownOnShip);
 		}
 
 		// mouseup on document because clones have no pointer events for passthrough on hover
 		// this is the drop event
 		this.boundHandleMouseUp = this.handleMouseUp.bind(this);
-		document.addEventListener('pointerup', this.boundHandleMouseUp);
+		document.addEventListener('mouseup', this.boundHandleMouseUp);
+		document.addEventListener('touchend', this.boundHandleMouseUp);
 
 		this.boundPointerMove = this.handlePointerMove.bind(this);
 		document.addEventListener('pointermove', this.boundPointerMove);
+		document.addEventListener('touchmove', this.boundPointerMove);
 
 		this.boundHandleKeyPress = this.handleDraggedKeyPress.bind(this);
 		document.addEventListener('keypress', this.boundHandleKeyPress);
 
-		Array.from(this.#boardGrid.querySelectorAll('.ship-cell')).forEach((cell) =>
-			cell.addEventListener('pointerenter', this.handleCellDrag.bind(this)),
-		);
+		Array.from(this.#boardGrid.querySelectorAll('.ship-cell')).forEach((cell) => {
+			cell.addEventListener('mouseenter', this.handleCellDrag.bind(this));
+			cell.addEventListener('touchenter', this.handleCellDrag.bind(this));
+			cell.addEventListener('pointerenter', this.handleCellDrag.bind(this));
+		});
 	}
 
 	getOffsetDepth() {
