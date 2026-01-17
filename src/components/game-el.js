@@ -8,17 +8,23 @@ export default class Game extends HTMLElement {
 		super();
 		this.id = 'game';
 
+		// const blockSize = blockSizeIn || Number(this.getAttribute('block-size'));
 		const blockSize =
-			window.getComputedStyle(this).getPropertyValue('--block-size') ||
+			Number(window.getComputedStyle(this).getPropertyValue('--block-size')) ||
 			blockSizeIn ||
 			Number(this.getAttribute('block-size'));
+
 		if (!blockSize) {
 			throw new Error('requires block-size attribute with a number');
 		}
+
+		// const holeSize = holeSizeIn || Number(this.getAttribute('hole-size'));
 		const holeSize =
-			window.getComputedStyle(this).getPropertyValue('--hole-size') ||
+			Number(window.getComputedStyle(this).getPropertyValue('--hole-size')) ||
 			holeSizeIn ||
 			Number(this.getAttribute('hole-size'));
+
+		console.log(blockSize, holeSize);
 
 		if (!holeSize) {
 			throw new Error('requires hit-size attribute with a number');
