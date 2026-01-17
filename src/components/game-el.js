@@ -24,8 +24,6 @@ export default class Game extends HTMLElement {
 			holeSizeIn ||
 			Number(this.getAttribute('hole-size'));
 
-		console.log(blockSize, holeSize);
-
 		if (!holeSize) {
 			throw new Error('requires hit-size attribute with a number');
 		}
