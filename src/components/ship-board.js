@@ -369,16 +369,16 @@ export default class ShipBoard extends BoardTray {
 		}
 
 		for (const ship of Object.values(this.#ships)) {
-			ship.removeEventListener('mousedown', this.boundHandleMouseDownOnShip);
+			ship.removeEventListener('pointerdown', this.boundHandleMouseDownOnShip);
 		}
 
 		// mouseup on document because clones have no pointer events for passthrough on hover
 		// this is the drop event
-		document.removeEventListener('mouseup', this.boundHandleMouseUp);
+		document.removeEventListener('pointerup', this.boundHandleMouseUp);
 		document.removeEventListener('pointermove', this.boundPointerMove);
 		document.removeEventListener('keypress', this.boundHandleKeyPress);
 		Array.from(this.#boardGrid.querySelectorAll('.ship-cell')).forEach((cell) =>
-			cell.removeEventListener('mouseenter', this.handleCellDrag),
+			cell.removeEventListener('pointerenter', this.handleCellDrag),
 		);
 	}
 
@@ -387,7 +387,6 @@ export default class ShipBoard extends BoardTray {
 		em.on(Events.PLACE_SHIP_FAIL, this.restoreShips.bind(this));
 
 		// pick arbitrary starting location on board for ships
-		console.log(this);
 		em.emit(Events.TRY_PLACE_SHIP, 'carrier', new Loc(0, 0), new Loc(4, 0));
 		em.emit(Events.TRY_PLACE_SHIP, 'battleship', new Loc(0, 1), new Loc(3, 1));
 		em.emit(Events.TRY_PLACE_SHIP, 'submarine', new Loc(0, 2), new Loc(2, 2));
@@ -398,13 +397,13 @@ export default class ShipBoard extends BoardTray {
 		// so we implement bespoke drag with mousedown mouseup etc
 		this.boundHandleMouseDownOnShip = this.handleMouseDownOnShip.bind(this);
 		for (const ship of Object.values(this.#ships)) {
-			ship.addEventListener('mousedown', this.boundHandleMouseDownOnShip);
+			ship.addEventListener('pointerdown', this.boundHandleMouseDownOnShip);
 		}
 
 		// mouseup on document because clones have no pointer events for passthrough on hover
 		// this is the drop event
 		this.boundHandleMouseUp = this.handleMouseUp.bind(this);
-		document.addEventListener('mouseup', this.boundHandleMouseUp);
+		document.addEventListener('pointerup', this.boundHandleMouseUp);
 
 		this.boundPointerMove = this.handlePointerMove.bind(this);
 		document.addEventListener('pointermove', this.boundPointerMove);
@@ -413,7 +412,7 @@ export default class ShipBoard extends BoardTray {
 		document.addEventListener('keypress', this.boundHandleKeyPress);
 
 		Array.from(this.#boardGrid.querySelectorAll('.ship-cell')).forEach((cell) =>
-			cell.addEventListener('mouseenter', this.handleCellDrag.bind(this)),
+			cell.addEventListener('pointerenter', this.handleCellDrag.bind(this)),
 		);
 	}
 
