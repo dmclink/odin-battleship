@@ -387,8 +387,10 @@ export default class ShipBoard extends BoardTray {
 	}
 
 	handleDoubleClick() {
-		console.log('double clicked');
-		this.#draggedClone.rotateCW();
+		if (this.lastClick && new Date().getTime() - this.lastClick.getTime() <= 500) {
+			this.#draggedClone.rotateCW();
+		}
+		this.lastClick = new Date();
 	}
 
 	teardown() {
@@ -434,7 +436,7 @@ export default class ShipBoard extends BoardTray {
 		for (const ship of Object.values(this.#ships)) {
 			ship.addEventListener('mousedown', this.boundHandleMouseDownOnShip);
 			ship.addEventListener('touchstart', this.boundHandleMouseDownOnShip);
-			ship.addEventListener('dblclick', this.boundHandleDoubleClick);
+			ship.addEventListener('touchstart', this.boundHandleDoubleClick);
 		}
 
 		// mouseup on document because clones have no pointer events for passthrough on hover
