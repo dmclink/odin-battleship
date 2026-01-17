@@ -253,8 +253,19 @@ main {
 game-el {
 	--color-primary: #4468ea;
 	--color-secondary: #203a99;
+	--hole-size: 10;
+	--block-size: 40;
 	display: grid;
 	justify-items: center;
+
+	@media (max-width: 430px) {
+		--hole-size: 5;
+		--block-size: 20;
+	}
+	@media (max-width: 600px) {
+		--hole-size: 8;
+		--block-size: 32;
+	}
 }
 
 footer {

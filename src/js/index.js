@@ -16,6 +16,6 @@ function restartGame() {
 	em.on(Events.RESTART_GAME, restartGame);
 }
 
-document.addEventListener('DOMContentLoaded', (e) => {
+document.addEventListener('DOMContentLoaded', () => {
 	restartGame();
 });
