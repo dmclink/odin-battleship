@@ -141,8 +141,8 @@ export default class ShipBoard extends BoardTray {
 			this.#draggedClone = clone;
 			this.#draggedShip = ship;
 
-			this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.width / 2}px`;
-			this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.height / 2}px`;
+			this.#draggedClone.style.left = `${ev.clientX || ev.touches[0].clientX - this.#draggedClone.width / 2}px`;
+			this.#draggedClone.style.top = `${ev.clientY || ev.touches[0].clientY - this.#draggedClone.height / 2}px`;
 
 			clone.style.display = 'block';
 		}
@@ -168,8 +168,8 @@ export default class ShipBoard extends BoardTray {
 
 	handlePointerMove(ev) {
 		if (this.#isDragging) {
-			this.#draggedClone.style.left = `${ev.clientX - this.#draggedClone.width / 2}px`;
-			this.#draggedClone.style.top = `${ev.clientY - this.#draggedClone.height / 2}px`;
+			this.#draggedClone.style.left = `${ev.clientX || ev.touches[0].clientX - this.#draggedClone.width / 2}px`;
+			this.#draggedClone.style.top = `${ev.clientY || ev.touches[0].clientY - this.#draggedClone.height / 2}px`;
 		}
 	}
 
@@ -179,6 +179,29 @@ export default class ShipBoard extends BoardTray {
 			const y = ev.target.getAttribute('data-row');
 			this.#draggedLoc = new Loc(Number(x), Number(y));
 			this.renderDropZone();
+		}
+	}
+
+	handleTouchDrag(ev) {
+		if (this.#isDragging) {
+			const touchX = ev.touches[0].clientX;
+			const touchY = ev.touches[0].clientY;
+
+			for (const cell of Array.from(this.#boardGrid.querySelectorAll('.ship-cell'))) {
+				const rect = cell.getBoundingClientRect();
+				const isInsideCell =
+					touchX >= rect.left && touchX <= rect.right && touchY <= rect.bottom && touchY >= rect.top;
+
+				if (isInsideCell) {
+					if (this.currentHoveredCell !== cell) {
+						this.currentHoveredCell = cell;
+						const x = cell.getAttribute('data-col');
+						const y = cell.getAttribute('data-row');
+						this.#draggedLoc = new Loc(Number(x), Number(y));
+						this.renderDropZone();
+					}
+				}
+			}
 		}
 	}
 
@@ -364,6 +387,7 @@ export default class ShipBoard extends BoardTray {
 	}
 
 	handleDoubleClick() {
+		console.log('double clicked');
 		this.#draggedClone.rotateCW();
 	}
 
@@ -387,9 +411,9 @@ export default class ShipBoard extends BoardTray {
 		document.removeEventListener('keypress', this.boundHandleKeyPress);
 		Array.from(this.#boardGrid.querySelectorAll('.ship-cell')).forEach((cell) => {
 			cell.removeEventListener('mouseenter', this.handleCellDrag);
-			cell.removeEventListener('touchenter', this.handleCellDrag);
 			cell.removeEventListener('pointerenter', this.handleCellDrag);
 		});
+		document.removeEventListener('touchmove', this.boundHandleTouchDrag);
 	}
 
 	bindEvents() {
@@ -410,7 +434,7 @@ export default class ShipBoard extends BoardTray {
 		for (const ship of Object.values(this.#ships)) {
 			ship.addEventListener('mousedown', this.boundHandleMouseDownOnShip);
 			ship.addEventListener('touchstart', this.boundHandleMouseDownOnShip);
-			ship.addEventListener('dbclick', this.boundHandleDoubleClick);
+			ship.addEventListener('dblclick', this.boundHandleDoubleClick);
 		}
 
 		// mouseup on document because clones have no pointer events for passthrough on hover
@@ -428,9 +452,11 @@ export default class ShipBoard extends BoardTray {
 
 		Array.from(this.#boardGrid.querySelectorAll('.ship-cell')).forEach((cell) => {
 			cell.addEventListener('mouseenter', this.handleCellDrag.bind(this));
-			cell.addEventListener('touchenter', this.handleCellDrag.bind(this));
 			cell.addEventListener('pointerenter', this.handleCellDrag.bind(this));
 		});
+
+		this.boundHandleTouchDrag = this.handleTouchDrag.bind(this);
+		document.addEventListener('touchmove', this.boundHandleTouchDrag);
 	}
 
 	getOffsetDepth() {
